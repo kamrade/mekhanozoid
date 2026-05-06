@@ -15,6 +15,10 @@ const (
 	EventTypeGameWon     EventType = "game_won"
 	EventTypeGameLost    EventType = "game_lost"
 	EventTypeCardDrawn   EventType = "card_drawn"
+
+	// Aliases
+	EventCardPlayed = EventTypeCardPlayed
+	EventDamage     = EventTypeDamageDealt
 )
 
 type GameEvent struct {

@@ -11,7 +11,9 @@ const (
 	ActionTypePlayCard  ActionType = "play_card"
 	ActionTypeAttack    ActionType = "attack"
 
-	ActionEndTurn = ActionTypeEndTurn
+	// Aliases
+	ActionEndTurn  = ActionTypeEndTurn
+	ActionPlayCard = ActionTypePlayCard
 )
 
 type TargetType string
