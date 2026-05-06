@@ -16,7 +16,7 @@ Current stack:
 
 ## Current stage
 
-Stage 1, steps 1–11 completed.
+Stage 1, steps 1–12 completed.
 
 Current status:
 
@@ -181,7 +181,7 @@ Stats: 2/3
 Effect: summon
 ```
 
-`drone` exists in the registry but is not playable yet.
+`drone` is playable via `ActionTypePlayCard` and summons a minion.
 
 ## Decks
 
@@ -269,6 +269,7 @@ boss
 - card must be in active player's hand
 - card definition must exist in `CardRegistry`
 - player must have enough mana
+- for minion cards, board must have free slots (`MaxBoardSize = 7`)
 - on success:
   - mana is spent
   - card is removed from hand
@@ -281,6 +282,7 @@ Implemented effects:
 ```go
 EffectDamageBoss
 EffectHealHero
+EffectSummon
 ```
 
 Unsupported effects return:
@@ -325,6 +327,27 @@ Repair-related errors:
 ErrTargetRequired
 ErrInvalidTarget
 ```
+
+## Drone behavior
+
+Playing `drone`:
+
+- costs 2 mana
+- removes the card from hand
+- summons a minion on the active player's board
+- creates `EventCardPlayed`
+- creates `EventMinionSummoned`
+- summoned minion is created from card stats:
+  - `Attack = 2`
+  - `Health = 3`
+  - `MaxHealth = 3`
+  - `CanAttack = false` on summon
+
+Board constraints:
+
+- maximum board size is `7` (`MaxBoardSize`)
+- when board is full, play is rejected with `ErrBoardFull`
+- on `ErrBoardFull`, game state must not mutate (no mana spend, card stays in hand, board unchanged)
 
 ## Victory
 
@@ -394,6 +417,7 @@ Important event types:
 EventTypeCardDrawn
 EventTypeTurnStarted
 EventTypeCardPlayed
+EventTypeMinionSummoned
 EventTypeDamageDealt
 EventTypeHeal
 EventTypeGameWon
@@ -403,6 +427,7 @@ Aliases:
 
 ```go
 EventCardPlayed
+EventMinionSummoned
 EventDamage
 EventHeal
 EventGameWon
@@ -422,6 +447,7 @@ ErrNotYourTurn
 ErrUnknownAction
 ErrCardNotInHand
 ErrUnknownCard
+ErrBoardFull
 ErrUnsupportedCardEffect
 ErrTargetRequired
 ErrInvalidTarget
@@ -438,44 +464,6 @@ ErrInvalidTarget
 - `ValidTargets` and `ActionPlayCard` targeting validation should use the same targeting rules.
 - Boss HP should not display below `0`.
 - Player HP should not exceed `MaxHealth`.
+- Summoned minions should not be able to attack on the same turn (`CanAttack = false` on summon).
+- Player board size should never exceed `MaxBoardSize`.
 - After `GameStatusWon`, no new action should be accepted by `ApplyAction`.
-
-## Known uncertainty to confirm before the next task
-
-Before making the next code change, confirm these facts against the actual code:
-
-1. Exact event aliases currently present:
-   - `EventDamage`
-   - `EventHeal`
-   - `EventGameWon`
-
-2. Exact `Target` struct fields currently present:
-   - `ID`
-   - `Type`
-   - `Kind`
-   - `PlayerID`
-   - `BossID`
-   - `MinionID`
-   - `OwnerID`
-   - `DisplayName`
-
-3. Exact `CardDefinition` fields currently present:
-   - `Effect`
-   - `Targeting`
-   - `Attack`
-   - `Health`
-
-4. Exact helper locations:
-   - `findCardInHand`
-   - `removeCardFromHand`
-   - `newTestGame`
-   - `newTestGameWithStrikeInPlayer1Hand`
-   - `newTestGameWithRepairInPlayer1Hand`
-   - `snapshotGameState`
-
-5. Next roadmap direction:
-   - playable minion `drone`
-   - discard pile
-   - `ValidActions`
-   - attack action
-   - boss behavior

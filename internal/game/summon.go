@@ -2,6 +2,18 @@ package game
 
 import "fmt"
 
+func canSummonMinion(player *Player) error {
+	if player == nil {
+		return ErrInvalidPlayerIndex
+	}
+
+	if len(player.Board) >= MaxBoardSize {
+		return ErrBoardFull
+	}
+
+	return nil
+}
+
 // SummonMinion creates a board minion from a minion card definition and adds it to the player's board.
 func SummonMinion(g *Game, playerIndex int, card CardDefinition, cardInstance CardInstance) (GameEvent, error) {
 	if g == nil {
@@ -14,8 +26,8 @@ func SummonMinion(g *Game, playerIndex int, card CardDefinition, cardInstance Ca
 
 	player := &g.Players[playerIndex]
 
-	if len(player.Board) >= MaxBoardSize {
-		return GameEvent{}, ErrBoardFull
+	if err := canSummonMinion(player); err != nil {
+		return GameEvent{}, err
 	}
 
 	minion := Minion{

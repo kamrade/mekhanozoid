@@ -3,6 +3,8 @@
 
 package game
 
+const MaxBoardSize = 7
+
 type Minion struct {
 	ID           MinionID
 	DefinitionID CardID
@@ -11,5 +13,6 @@ type Minion struct {
 	Attack       int
 	Health       int
 	MaxHealth    int
+	CanAttack    bool
 	Exhausted    bool
 }

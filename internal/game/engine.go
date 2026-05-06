@@ -11,6 +11,7 @@ var (
 	ErrUnknownAction         = errors.New("unknown action")
 	ErrCardNotInHand         = errors.New("card is not in hand")
 	ErrUnknownCard           = errors.New("unknown card")
+	ErrBoardFull             = errors.New("board is full")
 	ErrUnsupportedCardEffect = errors.New("unsupported card effect")
 	ErrTargetRequired        = errors.New("target is required")
 	ErrInvalidTarget         = errors.New("invalid target")
@@ -95,27 +96,32 @@ func playCard(g *Game, action Action) ([]GameEvent, error) {
 		return nil, ErrUnknownCard
 	}
 
-	if cardDefinition.Type != CardTypeSpell {
-		return nil, ErrUnsupportedCardEffect
+	if player.Mana < cardDefinition.Cost {
+		return nil, ErrNotEnoughMana
 	}
 
 	var resolvedTarget Target
 	var targetPlayerIndex int
-	var err error
 
-	if cardDefinition.Targeting.Required || action.TargetID != "" {
-		resolvedTarget, targetPlayerIndex, err = ValidateTargetForCard(g, cardDefinition, action.TargetID)
-		if err != nil {
+	switch cardDefinition.Type {
+	case CardTypeSpell:
+		var err error
+		if cardDefinition.Targeting.Required || action.TargetID != "" {
+			resolvedTarget, targetPlayerIndex, err = ValidateTargetForCard(g, cardDefinition, action.TargetID)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if err := validateSupportedSpellEffect(cardDefinition); err != nil {
 			return nil, err
 		}
-	}
-
-	if err := validateSupportedSpellEffect(cardDefinition); err != nil {
-		return nil, err
-	}
-
-	if player.Mana < cardDefinition.Cost {
-		return nil, ErrNotEnoughMana
+	case CardTypeMinion:
+		if err := canSummonMinion(player); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, ErrUnsupportedCardEffect
 	}
 
 	if err := SpendMana(g, playerIndex, cardDefinition.Cost); err != nil {
@@ -137,22 +143,30 @@ func playCard(g *Game, action Action) ([]GameEvent, error) {
 		cardPlayedEvent,
 	}
 
-	switch cardDefinition.Effect.Type {
-	case EffectDamageBoss:
-		damageEvent := DealDamage(g, cardDefinition.Effect.Amount)
-		damageEvent.PlayerID = player.ID
-		damageEvent.CardID = cardInstance.ID
+	switch cardDefinition.Type {
+	case CardTypeSpell:
+		switch cardDefinition.Effect.Type {
+		case EffectDamageBoss:
+			damageEvent := DealDamage(g, cardDefinition.Effect.Amount)
+			damageEvent.PlayerID = player.ID
+			damageEvent.CardID = cardInstance.ID
 
-		events = append(events, damageEvent)
+			events = append(events, damageEvent)
+		case EffectHealHero:
+			healEvent := Heal(g, targetPlayerIndex, cardDefinition.Effect.Amount)
+			healEvent.CardID = cardInstance.ID
 
-	case EffectHealHero:
-		healEvent := Heal(g, targetPlayerIndex, cardDefinition.Effect.Amount)
-		healEvent.CardID = cardInstance.ID
+			events = append(events, healEvent)
+		default:
+			return nil, ErrUnsupportedCardEffect
+		}
+	case CardTypeMinion:
+		summonEvent, err := SummonMinion(g, playerIndex, cardDefinition, cardInstance)
+		if err != nil {
+			return nil, err
+		}
 
-		events = append(events, healEvent)
-
-	default:
-		return nil, ErrUnsupportedCardEffect
+		events = append(events, summonEvent)
 	}
 
 	g.Events = append(g.Events, events...)
