@@ -19,6 +19,7 @@ const (
 	// Aliases
 	EventCardPlayed = EventTypeCardPlayed
 	EventDamage     = EventTypeDamageDealt
+	EventGameWon    = EventTypeGameWon
 )
 
 type GameEvent struct {

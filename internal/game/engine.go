@@ -130,6 +130,9 @@ func playCard(g *Game, action Action) ([]GameEvent, error) {
 
 	g.Events = append(g.Events, events...)
 
+	gameOverEvents := CheckGameOver(g)
+	events = append(events, gameOverEvents...)
+
 	return events, nil
 }
 
