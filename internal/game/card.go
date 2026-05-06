@@ -5,8 +5,21 @@ type CardType string
 const (
 	CardTypeSpell  CardType = "spell"
 	CardTypeMinion CardType = "minion"
-	CardTypeWeapon CardType = "weapon"
 )
+
+type EffectType string
+
+const (
+	EffectNone       EffectType = "none"
+	EffectDamageBoss EffectType = "damage_boss"
+	EffectHealHero   EffectType = "heal_hero"
+	EffectSummon     EffectType = "summon"
+)
+
+type CardEffect struct {
+	Type   EffectType
+	Amount int
+}
 
 type CardDefinition struct {
 	ID          CardID
@@ -14,6 +27,11 @@ type CardDefinition struct {
 	Type        CardType
 	Cost        int
 	Description string
+
+	Effect CardEffect
+
+	Attack int
+	Health int
 }
 
 type CardInstance struct {

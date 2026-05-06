@@ -1,0 +1,38 @@
+package game
+
+var CardRegistry = map[CardID]CardDefinition{
+	CardID("strike"): {
+		ID:          CardID("strike"),
+		Name:        "Strike",
+		Type:        CardTypeSpell,
+		Cost:        1,
+		Description: "Deal 3 damage to the boss.",
+		Effect: CardEffect{
+			Type:   EffectDamageBoss,
+			Amount: 3,
+		},
+	},
+	CardID("repair"): {
+		ID:          CardID("repair"),
+		Name:        "Repair",
+		Type:        CardTypeSpell,
+		Cost:        1,
+		Description: "Restore 3 health to a hero.",
+		Effect: CardEffect{
+			Type:   EffectHealHero,
+			Amount: 3,
+		},
+	},
+	CardID("drone"): {
+		ID:          CardID("drone"),
+		Name:        "Drone",
+		Type:        CardTypeMinion,
+		Cost:        2,
+		Description: "Summon a 2/3 Drone.",
+		Effect: CardEffect{
+			Type: EffectSummon,
+		},
+		Attack: 2,
+		Health: 3,
+	},
+}
