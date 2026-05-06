@@ -1,3 +1,6 @@
+// This file contains the card registry.
+// The registry is the source of truth for all card definitions available to the game engine.
+
 package game
 
 var CardRegistry = map[CardID]CardDefinition{

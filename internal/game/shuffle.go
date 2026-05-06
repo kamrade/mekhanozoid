@@ -1,3 +1,6 @@
+// This file contains deterministic shuffle logic for card slices.
+// The shuffle uses a seed so game setup can be reproduced in tests and debugging.
+
 package game
 
 import (

@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+// TestNewGameCreatesPlayersWithInitialMana verifies that players created by
+// NewGame start with the configured initial mana and max mana values.
 func TestNewGameCreatesPlayersWithInitialMana(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -24,6 +26,8 @@ func TestNewGameCreatesPlayersWithInitialMana(t *testing.T) {
 	}
 }
 
+// TestRefreshManaIncreasesMaxManaAndRefillsMana verifies that RefreshMana
+// increases a player's max mana by one and refills current mana to that value.
 func TestRefreshManaIncreasesMaxManaAndRefillsMana(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -45,6 +49,8 @@ func TestRefreshManaIncreasesMaxManaAndRefillsMana(t *testing.T) {
 	}
 }
 
+// TestRefreshManaDoesNotExceedMaxMana verifies that repeated mana refreshes
+// never increase a player's max mana beyond the global MaxMana cap.
 func TestRefreshManaDoesNotExceedMaxMana(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -68,6 +74,8 @@ func TestRefreshManaDoesNotExceedMaxMana(t *testing.T) {
 	}
 }
 
+// TestSpendManaSubtractsAvailableMana verifies that SpendMana subtracts the
+// requested amount when the player has enough available mana.
 func TestSpendManaSubtractsAvailableMana(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -90,6 +98,8 @@ func TestSpendManaSubtractsAvailableMana(t *testing.T) {
 	}
 }
 
+// TestSpendManaCanSpendAllMana verifies that SpendMana can reduce a player's
+// current mana to zero when spending exactly the available amount.
 func TestSpendManaCanSpendAllMana(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -112,6 +122,8 @@ func TestSpendManaCanSpendAllMana(t *testing.T) {
 	}
 }
 
+// TestSpendManaReturnsErrorWhenNotEnoughMana verifies that SpendMana rejects
+// spending more mana than the player has and leaves the player's mana unchanged.
 func TestSpendManaReturnsErrorWhenNotEnoughMana(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -135,6 +147,8 @@ func TestSpendManaReturnsErrorWhenNotEnoughMana(t *testing.T) {
 	}
 }
 
+// TestSpendManaReturnsErrorForNegativeAmount verifies that SpendMana rejects
+// negative amounts and does not mutate the player's current mana.
 func TestSpendManaReturnsErrorForNegativeAmount(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -158,6 +172,8 @@ func TestSpendManaReturnsErrorForNegativeAmount(t *testing.T) {
 	}
 }
 
+// TestSpendManaReturnsErrorForInvalidPlayerIndex verifies that SpendMana rejects
+// indexes that do not point to an existing player.
 func TestSpendManaReturnsErrorForInvalidPlayerIndex(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -179,6 +195,8 @@ func TestSpendManaReturnsErrorForInvalidPlayerIndex(t *testing.T) {
 	}
 }
 
+// TestSpendManaReturnsErrorForNilGame verifies that SpendMana handles a nil game
+// pointer safely and returns ErrNilGame.
 func TestSpendManaReturnsErrorForNilGame(t *testing.T) {
 	err := SpendMana(nil, 0, 1)
 
@@ -187,6 +205,8 @@ func TestSpendManaReturnsErrorForNilGame(t *testing.T) {
 	}
 }
 
+// TestRefreshManaDoesNotPanicForInvalidState verifies that RefreshMana safely
+// ignores nil games and invalid player indexes.
 func TestRefreshManaDoesNotPanicForInvalidState(t *testing.T) {
 	RefreshMana(nil, 0)
 

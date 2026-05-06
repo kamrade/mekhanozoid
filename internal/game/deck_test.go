@@ -2,6 +2,8 @@ package game
 
 import "testing"
 
+// TestStartingDeckSizeMatchesCardIDs verifies that the declared starting deck size
+// matches the actual number of card IDs used to build starting decks.
 func TestStartingDeckSizeMatchesCardIDs(t *testing.T) {
 	if StartingDeckSize != len(StartingDeckCardIDs) {
 		t.Fatalf(
@@ -12,6 +14,8 @@ func TestStartingDeckSizeMatchesCardIDs(t *testing.T) {
 	}
 }
 
+// TestStartingDeckCardsExistInRegistry verifies that every card in a generated
+// starting deck references a known card definition from CardRegistry.
 func TestStartingDeckCardsExistInRegistry(t *testing.T) {
 	deck := NewStartingDeck(PlayerID("player_1"))
 
@@ -20,6 +24,8 @@ func TestStartingDeckCardsExistInRegistry(t *testing.T) {
 	}
 }
 
+// TestNewGameHasNoUnknownCards verifies that NewGame creates players whose
+// decks and hands only contain card instances backed by CardRegistry definitions.
 func TestNewGameHasNoUnknownCards(t *testing.T) {
 	g := NewGame(
 		"game_1",

@@ -2,6 +2,8 @@ package game
 
 import "testing"
 
+// TestDrawCardMovesTopCardFromDeckToHand verifies that DrawCard takes the top
+// card from a player's deck and appends that exact card to the player's hand.
 func TestDrawCardMovesTopCardFromDeckToHand(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -50,6 +52,8 @@ func TestDrawCardMovesTopCardFromDeckToHand(t *testing.T) {
 	}
 }
 
+// TestDrawCardAppendsEventToGameEvents verifies that a successful card draw
+// returns an event and also stores that event in the game's event history.
 func TestDrawCardAppendsEventToGameEvents(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -77,6 +81,8 @@ func TestDrawCardAppendsEventToGameEvents(t *testing.T) {
 	}
 }
 
+// TestDrawCardDoesNotPanicWithEmptyDeck verifies that drawing from an empty deck
+// does not mutate the player's hand or deck and still returns a safe event.
 func TestDrawCardDoesNotPanicWithEmptyDeck(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -109,6 +115,8 @@ func TestDrawCardDoesNotPanicWithEmptyDeck(t *testing.T) {
 	}
 }
 
+// TestDrawCardDoesNotPanicWithInvalidPlayerIndex verifies that invalid player
+// indexes are handled safely without panicking or mutating game state.
 func TestDrawCardDoesNotPanicWithInvalidPlayerIndex(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -130,6 +138,8 @@ func TestDrawCardDoesNotPanicWithInvalidPlayerIndex(t *testing.T) {
 	}
 }
 
+// TestDrawCardDoesNotPanicWithNilGame verifies that DrawCard handles a nil game
+// pointer safely and returns an event instead of panicking.
 func TestDrawCardDoesNotPanicWithNilGame(t *testing.T) {
 	events := DrawCard(nil, 0)
 

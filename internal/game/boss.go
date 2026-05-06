@@ -1,3 +1,6 @@
+// This file defines the Boss domain model.
+// The boss represents the shared enemy that both players cooperate against.
+
 package game
 
 const StartingBossHealth = 95

@@ -1,3 +1,6 @@
+// This file contains deck-related logic.
+// It defines the starting deck, creates card instances, deals starting hands, and supports drawing cards.
+
 package game
 
 import "fmt"

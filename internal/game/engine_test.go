@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+// TestApplyActionEndTurnSwitchesFromPlayer1ToPlayer2 verifies that EndTurn
+// moves the active turn from the first player to the second player and applies start-of-turn effects.
 func TestApplyActionEndTurnSwitchesFromPlayer1ToPlayer2(t *testing.T) {
 	g := newTestGame()
 
@@ -65,6 +67,8 @@ func TestApplyActionEndTurnSwitchesFromPlayer1ToPlayer2(t *testing.T) {
 	}
 }
 
+// TestApplyActionEndTurnSwitchesBackToPlayer1 verifies that consecutive EndTurn
+// actions rotate the active player back to the first player.
 func TestApplyActionEndTurnSwitchesBackToPlayer1(t *testing.T) {
 	g := newTestGame()
 
@@ -100,6 +104,8 @@ func TestApplyActionEndTurnSwitchesBackToPlayer1(t *testing.T) {
 	}
 }
 
+// TestApplyActionEndTurnIncreasesTurnEachTime verifies that every successful
+// EndTurn action increments the game's turn counter exactly once.
 func TestApplyActionEndTurnIncreasesTurnEachTime(t *testing.T) {
 	g := newTestGame()
 
@@ -130,6 +136,8 @@ func TestApplyActionEndTurnIncreasesTurnEachTime(t *testing.T) {
 	}
 }
 
+// TestApplyActionEndTurnAppendsEventsToGameEvents verifies that events produced
+// by ApplyAction are also stored in the game's event history.
 func TestApplyActionEndTurnAppendsEventsToGameEvents(t *testing.T) {
 	g := newTestGame()
 
@@ -166,6 +174,8 @@ func TestApplyActionEndTurnAppendsEventsToGameEvents(t *testing.T) {
 	}
 }
 
+// TestApplyActionEndTurnRejectsInactivePlayer verifies that a player who is not
+// currently active cannot end another player's turn.
 func TestApplyActionEndTurnRejectsInactivePlayer(t *testing.T) {
 	g := newTestGame()
 
@@ -181,6 +191,8 @@ func TestApplyActionEndTurnRejectsInactivePlayer(t *testing.T) {
 	}
 }
 
+// TestApplyActionReturnsErrorWhenGameIsNotActive verifies that actions are
+// rejected when the game is not in the active status.
 func TestApplyActionReturnsErrorWhenGameIsNotActive(t *testing.T) {
 	statuses := []GameStatus{
 		GameStatusCreated,
@@ -203,6 +215,8 @@ func TestApplyActionReturnsErrorWhenGameIsNotActive(t *testing.T) {
 	}
 }
 
+// TestApplyActionReturnsErrorForUnknownAction verifies that unsupported action
+// types are rejected instead of being silently ignored.
 func TestApplyActionReturnsErrorForUnknownAction(t *testing.T) {
 	g := newTestGame()
 
@@ -216,6 +230,8 @@ func TestApplyActionReturnsErrorForUnknownAction(t *testing.T) {
 	}
 }
 
+// TestApplyActionReturnsErrorForNilGame verifies that ApplyAction handles a nil
+// game pointer safely and returns ErrNilGame.
 func TestApplyActionReturnsErrorForNilGame(t *testing.T) {
 	_, err := ApplyAction(nil, Action{
 		Type:     ActionTypeEndTurn,
@@ -227,6 +243,8 @@ func TestApplyActionReturnsErrorForNilGame(t *testing.T) {
 	}
 }
 
+// TestApplyActionReturnsErrorForUnknownPlayer verifies that actions from a
+// player ID that does not exist in the game are rejected.
 func TestApplyActionReturnsErrorForUnknownPlayer(t *testing.T) {
 	g := newTestGame()
 
@@ -240,6 +258,7 @@ func TestApplyActionReturnsErrorForUnknownPlayer(t *testing.T) {
 	}
 }
 
+// newTestGame creates a deterministic two-player game for engine tests.
 func newTestGame() *Game {
 	return NewGame(
 		"game_1",
@@ -249,6 +268,8 @@ func newTestGame() *Game {
 	)
 }
 
+// hasEventType reports whether a slice of game events contains at least one
+// event with the requested type.
 func hasEventType(events []GameEvent, eventType EventType) bool {
 	for _, event := range events {
 		if event.Type == eventType {

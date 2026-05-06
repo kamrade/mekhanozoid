@@ -1,3 +1,66 @@
+// ids.go
+// This file defines strongly typed identifiers used by the game domain.
+// Typed IDs help avoid mixing unrelated entities such as players, cards, bosses, and minions.
+
+// game.go
+// This file defines the root Game aggregate and game lifecycle statuses.
+// It also provides NewGame, the factory function for creating the initial game state.
+
+// player_config.go
+// This file defines PlayerConfig, the input data required to create players
+// when initializing a new game.
+
+// player.go
+// This file defines the Player domain model.
+// A player owns cards, has health and mana, and may be marked as the current active player.
+
+// boss.go
+// This file defines the Boss domain model.
+// The boss represents the shared enemy that both players cooperate against.
+
+// card.go
+// This file defines card-related domain types.
+// CardDefinition describes a card template, while CardInstance represents a concrete card in a game.
+
+// card_registry.go
+// This file contains the card registry.
+// The registry is the source of truth for all card definitions available to the game engine.
+
+// card_validation.go
+// This file contains validation helpers for card definitions and card instances.
+// These helpers ensure that decks and hands only reference cards known by the registry.
+
+// deck.go
+// This file contains deck-related logic.
+// It defines the starting deck, creates card instances, deals starting hands, and supports drawing cards.
+
+// shuffle.go
+// This file contains deterministic shuffle logic for card slices.
+// The shuffle uses a seed so game setup can be reproduced in tests and debugging.
+
+// minion.go
+// This file defines the Minion domain model.
+// A minion is a summoned board entity owned by a player and created from a card definition.
+
+// action.go
+// This file defines player actions and action targets.
+// Actions describe player intent and are processed by the game engine through ApplyAction.
+
+// event.go
+// This file defines game events.
+// Events describe important changes in game state and can later be used by UI, logs, or replays.
+
+// mana.go
+// This file contains mana-related rules.
+// It supports refreshing mana at the start of a turn and spending mana safely.
+
+// engine.go
+// This file contains the central game engine entry point.
+// ApplyAction validates and applies player actions, mutates game state, and returns generated events.
+
+// This file defines the root Game aggregate and game lifecycle statuses.
+// It also provides NewGame, the factory function for creating the initial game state.
+
 package game
 
 type GameStatus string

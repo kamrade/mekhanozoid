@@ -2,6 +2,8 @@ package game
 
 import "testing"
 
+// TestNewPlayer verifies that NewPlayer initializes the player's identity,
+// starting health, and empty card zones.
 func TestNewPlayer(t *testing.T) {
 	player := NewPlayer(PlayerID("player_1"), "Player 1")
 
@@ -34,6 +36,8 @@ func TestNewPlayer(t *testing.T) {
 	}
 }
 
+// TestNewBoss verifies that NewBoss initializes the boss identity, name,
+// health, and max health values.
 func TestNewBoss(t *testing.T) {
 	boss := NewBoss(BossID("boss_1"), "Mechazod")
 
@@ -54,6 +58,8 @@ func TestNewBoss(t *testing.T) {
 	}
 }
 
+// TestCardDefinition verifies that a card definition can describe a valid card
+// template with an ID and card type.
 func TestCardDefinition(t *testing.T) {
 	card := CardDefinition{
 		ID:          CardID("strike"),
@@ -72,6 +78,8 @@ func TestCardDefinition(t *testing.T) {
 	}
 }
 
+// TestCardInstance verifies that a card instance references a card definition
+// and belongs to a specific owner.
 func TestCardInstance(t *testing.T) {
 	card := CardInstance{
 		ID:           CardInstanceID("card_instance_1"),
@@ -92,6 +100,8 @@ func TestCardInstance(t *testing.T) {
 	}
 }
 
+// TestMinion verifies that a minion can represent a summoned board entity with
+// identity, ownership, combat stats, and health values.
 func TestMinion(t *testing.T) {
 	minion := Minion{
 		ID:           MinionID("minion_1"),
@@ -117,6 +127,8 @@ func TestMinion(t *testing.T) {
 	}
 }
 
+// TestAction verifies that an action can describe player intent, including the
+// action type, acting player, card involved, and target.
 func TestAction(t *testing.T) {
 	action := Action{
 		Type:     ActionTypePlayCard,
@@ -137,6 +149,8 @@ func TestAction(t *testing.T) {
 	}
 }
 
+// TestGameEvent verifies that a game event can describe a state change with
+// event type, involved player, target, amount, message, and turn number.
 func TestGameEvent(t *testing.T) {
 	event := GameEvent{
 		Type:     EventTypeDamageDealt,

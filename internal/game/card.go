@@ -1,3 +1,6 @@
+// This file defines card-related domain types.
+// CardDefinition describes a card template, while CardInstance represents a concrete card in a game.
+
 package game
 
 type CardType string

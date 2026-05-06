@@ -1,3 +1,6 @@
+// This file contains the central game engine entry point.
+// ApplyAction validates and applies player actions, mutates game state, and returns generated events.
+
 package game
 
 import "errors"

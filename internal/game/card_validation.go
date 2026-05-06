@@ -1,3 +1,6 @@
+// This file contains validation helpers for card definitions and card instances.
+// These helpers ensure that decks and hands only reference cards known by the registry.
+
 package game
 
 import "fmt"

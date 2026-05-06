@@ -1,3 +1,6 @@
+// This file defines player actions and action targets.
+// Actions describe player intent and are processed by the game engine through ApplyAction.
+
 package game
 
 type ActionType string

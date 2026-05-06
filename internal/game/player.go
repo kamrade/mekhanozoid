@@ -1,3 +1,6 @@
+// This file defines the Player domain model.
+// A player owns cards, has health and mana, and may be marked as the current active player.
+
 package game
 
 const StartingPlayerHealth = 30

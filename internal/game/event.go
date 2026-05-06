@@ -1,3 +1,6 @@
+// This file defines game events.
+// Events describe important changes in game state and can later be used by UI, logs, or replays.
+
 package game
 
 type EventType string

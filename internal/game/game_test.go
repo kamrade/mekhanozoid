@@ -2,6 +2,8 @@ package game
 
 import "testing"
 
+// TestNewGameCreatesInitialState verifies that NewGame creates the core game state:
+// game ID, active status, two players, active player, boss, and initial turn number.
 func TestNewGameCreatesInitialState(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -61,6 +63,8 @@ func TestNewGameCreatesInitialState(t *testing.T) {
 	}
 }
 
+// TestNewGameCreatesPlayersWithStartingHealth verifies that each player created
+// by NewGame starts with the configured starting health.
 func TestNewGameCreatesPlayersWithStartingHealth(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -76,6 +80,8 @@ func TestNewGameCreatesPlayersWithStartingHealth(t *testing.T) {
 	}
 }
 
+// TestNewGameCreatesDecksAndHands verifies that NewGame creates starting decks
+// and deals the expected number of cards into each player's hand.
 func TestNewGameCreatesDecksAndHands(t *testing.T) {
 	g := NewGame(
 		"game_1",
@@ -101,6 +107,8 @@ func TestNewGameCreatesDecksAndHands(t *testing.T) {
 	}
 }
 
+// TestNewGameIsDeterministicForSameSeed verifies that using the same seed
+// creates the same shuffled deck and starting hand order.
 func TestNewGameIsDeterministicForSameSeed(t *testing.T) {
 	g1 := NewGame(
 		"game_1",
@@ -122,6 +130,8 @@ func TestNewGameIsDeterministicForSameSeed(t *testing.T) {
 	assertSameCards(t, g1.Players[1].Deck, g2.Players[1].Deck)
 }
 
+// TestNewGameProducesDifferentShuffleForDifferentSeeds verifies that changing
+// the seed changes the resulting card order.
 func TestNewGameProducesDifferentShuffleForDifferentSeeds(t *testing.T) {
 	g1 := NewGame(
 		"game_1",
@@ -143,6 +153,7 @@ func TestNewGameProducesDifferentShuffleForDifferentSeeds(t *testing.T) {
 	}
 }
 
+// assertSameCards fails the test if two card slices differ in length or order.
 func assertSameCards(t *testing.T, a []CardInstance, b []CardInstance) {
 	t.Helper()
 
@@ -151,6 +162,7 @@ func assertSameCards(t *testing.T, a []CardInstance, b []CardInstance) {
 	}
 }
 
+// sameCards reports whether two card slices contain the same cards in the same order.
 func sameCards(a []CardInstance, b []CardInstance) bool {
 	if len(a) != len(b) {
 		return false

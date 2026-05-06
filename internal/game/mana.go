@@ -1,3 +1,6 @@
+// This file contains mana-related rules.
+// It supports refreshing mana at the start of a turn and spending mana safely.
+
 package game
 
 import "errors"
