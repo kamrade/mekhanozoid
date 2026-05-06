@@ -7,6 +7,8 @@ const (
 	ActionTypeEndTurn   ActionType = "end_turn"
 	ActionTypePlayCard  ActionType = "play_card"
 	ActionTypeAttack    ActionType = "attack"
+
+	ActionEndTurn = ActionTypeEndTurn
 )
 
 type TargetType string
