@@ -1,5 +1,7 @@
 package game
 
+const StartingBossHealth = 95
+
 type Boss struct {
 	ID        BossID
 	Name      string
@@ -13,9 +15,9 @@ func NewBoss(id BossID, name string) Boss {
 	return Boss{
 		ID:        id,
 		Name:      name,
-		Health:    95,
+		Health:    StartingBossHealth,
 		Attack:    2,
 		Armor:     0,
-		MaxHealth: 95,
+		MaxHealth: StartingBossHealth,
 	}
 }

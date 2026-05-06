@@ -1,5 +1,7 @@
 package game
 
+const StartingPlayerHealth = 30
+
 type Player struct {
 	ID        PlayerID
 	Name      string
@@ -15,7 +17,7 @@ func NewPlayer(id PlayerID, name string) Player {
 	return Player{
 		ID:        id,
 		Name:      name,
-		Health:    30,
+		Health:    StartingPlayerHealth,
 		Deck:      []CardInstance{},
 		Hand:      []CardInstance{},
 		Board:     []Minion{},
