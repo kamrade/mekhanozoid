@@ -1,0 +1,25 @@
+package game
+
+type EventType string
+
+const (
+	EventTypeGameCreated EventType = "game_created"
+	EventTypeGameStarted EventType = "game_started"
+	EventTypeTurnStarted EventType = "turn_started"
+	EventTypeTurnEnded   EventType = "turn_ended"
+	EventTypeCardPlayed  EventType = "card_played"
+	EventTypeDamageDealt EventType = "damage_dealt"
+	EventTypeGameWon     EventType = "game_won"
+	EventTypeGameLost    EventType = "game_lost"
+)
+
+type GameEvent struct {
+	Type     EventType
+	PlayerID PlayerID
+	CardID   CardInstanceID
+	SourceID MinionID
+	Target   Target
+	Amount   int
+	Message  string
+	Turn     int
+}
