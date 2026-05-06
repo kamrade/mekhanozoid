@@ -61,6 +61,10 @@ func TestRequiredCardEffects(t *testing.T) {
 	repair := CardRegistry[CardID("repair")]
 	drone := CardRegistry[CardID("drone")]
 
+	if repair.Effect.Amount != 5 {
+		t.Fatalf("expected repair amount 5, got %d", repair.Effect.Amount)
+	}
+
 	if strike.Effect.Type != EffectDamageBoss {
 		t.Fatalf("expected strike effect %q, got %q", EffectDamageBoss, strike.Effect.Type)
 	}
@@ -73,7 +77,7 @@ func TestRequiredCardEffects(t *testing.T) {
 		t.Fatalf("expected repair effect %q, got %q", EffectHealHero, repair.Effect.Type)
 	}
 
-	if repair.Effect.Amount != 3 {
+	if repair.Effect.Amount != 5 {
 		t.Fatalf("expected repair amount 3, got %d", repair.Effect.Amount)
 	}
 
@@ -93,5 +97,21 @@ func TestDroneStats(t *testing.T) {
 
 	if drone.Health != 3 {
 		t.Fatalf("expected drone health 3, got %d", drone.Health)
+	}
+}
+
+func TestRepairRequiresHeroTarget(t *testing.T) {
+	repair := CardRegistry[CardID("repair")]
+
+	if !repair.Targeting.Required {
+		t.Fatal("expected repair to require a target")
+	}
+
+	if len(repair.Targeting.AllowedKinds) != 1 {
+		t.Fatalf("expected repair to have 1 allowed target kind, got %d", len(repair.Targeting.AllowedKinds))
+	}
+
+	if repair.Targeting.AllowedKinds[0] != TargetKindHero {
+		t.Fatalf("expected repair to allow %q targets, got %q", TargetKindHero, repair.Targeting.AllowedKinds[0])
 	}
 }

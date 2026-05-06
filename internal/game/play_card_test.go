@@ -218,8 +218,10 @@ func hasCardInHand(player *Player, cardID CardInstanceID) bool {
 
 type gameStateSnapshot struct {
 	Player1Mana     int
+	Player1Health   int
 	Player1HandSize int
 	Player2Mana     int
+	Player2Health   int
 	Player2HandSize int
 	BossHealth      int
 	EventCount      int
@@ -230,8 +232,10 @@ type gameStateSnapshot struct {
 func snapshotGameState(g *Game) gameStateSnapshot {
 	return gameStateSnapshot{
 		Player1Mana:     g.Players[0].Mana,
+		Player1Health:   g.Players[0].Health,
 		Player1HandSize: len(g.Players[0].Hand),
 		Player2Mana:     g.Players[1].Mana,
+		Player2Health:   g.Players[1].Health,
 		Player2HandSize: len(g.Players[1].Hand),
 		BossHealth:      g.Boss.Health,
 		EventCount:      len(g.Events),
@@ -242,6 +246,14 @@ func snapshotGameState(g *Game) gameStateSnapshot {
 
 func assertGameStateUnchanged(t *testing.T, snapshot gameStateSnapshot, g *Game) {
 	t.Helper()
+
+	if g.Players[0].Health != snapshot.Player1Health {
+		t.Fatalf("expected player 1 health to remain %d, got %d", snapshot.Player1Health, g.Players[0].Health)
+	}
+
+	if g.Players[1].Health != snapshot.Player2Health {
+		t.Fatalf("expected player 2 health to remain %d, got %d", snapshot.Player2Health, g.Players[1].Health)
+	}
 
 	if g.Players[0].Mana != snapshot.Player1Mana {
 		t.Fatalf("expected player 1 mana to remain %d, got %d", snapshot.Player1Mana, g.Players[0].Mana)

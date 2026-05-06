@@ -12,6 +12,8 @@ var (
 	ErrCardNotInHand         = errors.New("card is not in hand")
 	ErrUnknownCard           = errors.New("unknown card")
 	ErrUnsupportedCardEffect = errors.New("unsupported card effect")
+	ErrTargetRequired        = errors.New("target is required")
+	ErrInvalidTarget         = errors.New("invalid target")
 )
 
 func ApplyAction(g *Game, action Action) ([]GameEvent, error) {
@@ -97,8 +99,19 @@ func playCard(g *Game, action Action) ([]GameEvent, error) {
 		return nil, ErrUnsupportedCardEffect
 	}
 
-	if cardDefinition.Effect.Type != EffectDamageBoss {
-		return nil, ErrUnsupportedCardEffect
+	var resolvedTarget Target
+	var targetPlayerIndex int
+	var err error
+
+	if cardDefinition.Targeting.Required || action.TargetID != "" {
+		resolvedTarget, targetPlayerIndex, err = ValidateTargetForCard(g, cardDefinition, action.TargetID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err := validateSupportedSpellEffect(cardDefinition); err != nil {
+		return nil, err
 	}
 
 	if player.Mana < cardDefinition.Cost {
@@ -115,17 +128,31 @@ func playCard(g *Game, action Action) ([]GameEvent, error) {
 		Type:     EventCardPlayed,
 		PlayerID: player.ID,
 		CardID:   cardInstance.ID,
+		Target:   resolvedTarget,
 		Message:  "card played",
 		Turn:     g.Turn,
 	}
 
-	damageEvent := DealDamage(g, cardDefinition.Effect.Amount)
-	damageEvent.PlayerID = player.ID
-	damageEvent.CardID = cardInstance.ID
-
 	events := []GameEvent{
 		cardPlayedEvent,
-		damageEvent,
+	}
+
+	switch cardDefinition.Effect.Type {
+	case EffectDamageBoss:
+		damageEvent := DealDamage(g, cardDefinition.Effect.Amount)
+		damageEvent.PlayerID = player.ID
+		damageEvent.CardID = cardInstance.ID
+
+		events = append(events, damageEvent)
+
+	case EffectHealHero:
+		healEvent := Heal(g, targetPlayerIndex, cardDefinition.Effect.Amount)
+		healEvent.CardID = cardInstance.ID
+
+		events = append(events, healEvent)
+
+	default:
+		return nil, ErrUnsupportedCardEffect
 	}
 
 	g.Events = append(g.Events, events...)
@@ -198,4 +225,13 @@ func setActivePlayer(g *Game, playerIndex int) {
 	}
 
 	g.ActivePlayerID = g.Players[playerIndex].ID
+}
+
+func validateSupportedSpellEffect(card CardDefinition) error {
+	switch card.Effect.Type {
+	case EffectDamageBoss, EffectHealHero:
+		return nil
+	default:
+		return ErrUnsupportedCardEffect
+	}
 }

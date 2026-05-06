@@ -19,6 +19,19 @@ const (
 	EffectSummon     EffectType = "summon"
 )
 
+type TargetKind string
+
+const (
+	TargetKindNone TargetKind = "none"
+	TargetKindHero TargetKind = "hero"
+	TargetKindBoss TargetKind = "boss"
+)
+
+type TargetingRule struct {
+	Required     bool
+	AllowedKinds []TargetKind
+}
+
 type CardEffect struct {
 	Type   EffectType
 	Amount int
@@ -31,7 +44,8 @@ type CardDefinition struct {
 	Cost        int
 	Description string
 
-	Effect CardEffect
+	Effect    CardEffect
+	Targeting TargetingRule
 
 	Attack int
 	Health int

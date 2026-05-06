@@ -7,6 +7,10 @@ import "testing"
 func TestNewPlayer(t *testing.T) {
 	player := NewPlayer(PlayerID("player_1"), "Player 1")
 
+	if player.MaxHealth != StartingPlayerHealth {
+		t.Fatalf("expected max health %d, got %d", StartingPlayerHealth, player.MaxHealth)
+	}
+
 	if player.ID != PlayerID("player_1") {
 		t.Fatalf("expected player ID %q, got %q", PlayerID("player_1"), player.ID)
 	}

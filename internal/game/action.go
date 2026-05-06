@@ -25,6 +25,12 @@ const (
 	TargetTypeMinion TargetType = "minion"
 )
 
+const (
+	TargetIDHero0 = "hero:0"
+	TargetIDHero1 = "hero:1"
+	TargetIDBoss  = "boss"
+)
+
 type Target struct {
 	Type     TargetType
 	PlayerID PlayerID
@@ -37,5 +43,10 @@ type Action struct {
 	PlayerID PlayerID
 	CardID   CardInstanceID
 	SourceID MinionID
+
+	// Почему TargetID отдельно от Target
+	// TargetID — входной формат действия: "hero:0", "hero:1", "boss"
+	// Target   — нормализованная доменная структура для событий и будущей логики
+	TargetID string
 	Target   Target
 }

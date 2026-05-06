@@ -12,6 +12,7 @@ const (
 	EventTypeTurnEnded   EventType = "turn_ended"
 	EventTypeCardPlayed  EventType = "card_played"
 	EventTypeDamageDealt EventType = "damage_dealt"
+	EventTypeHeal        EventType = "heal"
 	EventTypeGameWon     EventType = "game_won"
 	EventTypeGameLost    EventType = "game_lost"
 	EventTypeCardDrawn   EventType = "card_drawn"
@@ -19,6 +20,7 @@ const (
 	// Aliases
 	EventCardPlayed = EventTypeCardPlayed
 	EventDamage     = EventTypeDamageDealt
+	EventHeal       = EventTypeHeal
 	EventGameWon    = EventTypeGameWon
 )
 

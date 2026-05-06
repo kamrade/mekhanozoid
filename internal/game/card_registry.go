@@ -14,16 +14,28 @@ var CardRegistry = map[CardID]CardDefinition{
 			Type:   EffectDamageBoss,
 			Amount: 3,
 		},
+		Targeting: TargetingRule{
+			Required: false,
+			AllowedKinds: []TargetKind{
+				TargetKindBoss,
+			},
+		},
 	},
 	CardID("repair"): {
 		ID:          CardID("repair"),
 		Name:        "Repair",
 		Type:        CardTypeSpell,
-		Cost:        1,
+		Cost:        2,
 		Description: "Restore 3 health to a hero.",
 		Effect: CardEffect{
 			Type:   EffectHealHero,
-			Amount: 3,
+			Amount: 5,
+		},
+		Targeting: TargetingRule{
+			Required: true,
+			AllowedKinds: []TargetKind{
+				TargetKindHero,
+			},
 		},
 	},
 	CardID("drone"): {
