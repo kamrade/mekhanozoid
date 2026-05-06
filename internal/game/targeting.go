@@ -2,6 +2,39 @@ package game
 
 import "strconv"
 
+// ValidTargets returns all legal targets for a card instance in a player's hand.
+// It is intended for future UI code that needs to highlight selectable targets.
+func ValidTargets(g *Game, playerID string, cardInstanceID string) ([]Target, error) {
+	if g == nil {
+		return nil, ErrNilGame
+	}
+
+	playerIndex := findPlayerIndexByID(g, PlayerID(playerID))
+	if playerIndex == -1 {
+		return nil, ErrInvalidPlayerIndex
+	}
+
+	player := &g.Players[playerIndex]
+
+	cardIndex := findCardInHand(player, CardInstanceID(cardInstanceID))
+	if cardIndex == -1 {
+		return nil, ErrCardNotInHand
+	}
+
+	cardInstance := player.Hand[cardIndex]
+
+	cardDefinition, ok := CardRegistry[cardInstance.DefinitionID]
+	if !ok {
+		return nil, ErrUnknownCard
+	}
+
+	if !cardDefinition.Targeting.Required {
+		return []Target{}, nil
+	}
+
+	return targetsForRule(g, cardDefinition.Targeting), nil
+}
+
 func ResolveTarget(g *Game, targetID string) (Target, int, error) {
 	if g == nil {
 		return Target{}, -1, ErrNilGame
@@ -13,8 +46,11 @@ func ResolveTarget(g *Game, targetID string) (Target, int, error) {
 
 	case TargetIDBoss:
 		return Target{
-			Type:   TargetTypeBoss,
-			BossID: g.Boss.ID,
+			ID:          TargetIDBoss,
+			Type:        TargetTypeBoss,
+			Kind:        TargetKindBoss,
+			BossID:      g.Boss.ID,
+			DisplayName: g.Boss.Name,
 		}, -1, nil
 
 	case TargetIDHero0, TargetIDHero1:
@@ -27,9 +63,15 @@ func ResolveTarget(g *Game, targetID string) (Target, int, error) {
 			return Target{}, -1, ErrInvalidTarget
 		}
 
+		player := g.Players[index]
+
 		return Target{
-			Type:     TargetTypePlayer,
-			PlayerID: g.Players[index].ID,
+			ID:          targetID,
+			Type:        TargetTypePlayer,
+			Kind:        TargetKindHero,
+			PlayerID:    player.ID,
+			OwnerID:     player.ID,
+			DisplayName: player.Name,
 		}, index, nil
 
 	default:
@@ -51,22 +93,59 @@ func ValidateTargetForCard(g *Game, card CardDefinition, targetID string) (Targe
 		return target, playerIndex, nil
 	}
 
-	targetKind := targetKindFromTarget(target)
-	if !isAllowedTargetKind(targetKind, card.Targeting.AllowedKinds) {
+	if !isAllowedTargetKind(target.Kind, card.Targeting.AllowedKinds) {
 		return Target{}, -1, ErrInvalidTarget
 	}
 
 	return target, playerIndex, nil
 }
 
-func targetKindFromTarget(target Target) TargetKind {
-	switch target.Type {
-	case TargetTypePlayer:
-		return TargetKindHero
-	case TargetTypeBoss:
-		return TargetKindBoss
-	default:
-		return TargetKindNone
+func targetsForRule(g *Game, rule TargetingRule) []Target {
+	if g == nil {
+		return []Target{}
+	}
+
+	targets := []Target{}
+
+	for _, kind := range rule.AllowedKinds {
+		switch kind {
+		case TargetKindHero:
+			targets = append(targets, heroTargets(g)...)
+
+		case TargetKindBoss:
+			targets = append(targets, bossTarget(g))
+		}
+	}
+
+	return targets
+}
+
+func heroTargets(g *Game) []Target {
+	targets := make([]Target, 0, len(g.Players))
+
+	for i, player := range g.Players {
+		targetID := "hero:" + strconv.Itoa(i)
+
+		targets = append(targets, Target{
+			ID:          targetID,
+			Type:        TargetTypePlayer,
+			Kind:        TargetKindHero,
+			PlayerID:    player.ID,
+			OwnerID:     player.ID,
+			DisplayName: player.Name,
+		})
+	}
+
+	return targets
+}
+
+func bossTarget(g *Game) Target {
+	return Target{
+		ID:          TargetIDBoss,
+		Type:        TargetTypeBoss,
+		Kind:        TargetKindBoss,
+		BossID:      g.Boss.ID,
+		DisplayName: g.Boss.Name,
 	}
 }
 

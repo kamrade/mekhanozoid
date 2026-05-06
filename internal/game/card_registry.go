@@ -26,7 +26,7 @@ var CardRegistry = map[CardID]CardDefinition{
 		Name:        "Repair",
 		Type:        CardTypeSpell,
 		Cost:        2,
-		Description: "Restore 3 health to a hero.",
+		Description: "Restore 5 health to a hero.",
 		Effect: CardEffect{
 			Type:   EffectHealHero,
 			Amount: 5,

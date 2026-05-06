@@ -32,10 +32,14 @@ const (
 )
 
 type Target struct {
-	Type     TargetType
-	PlayerID PlayerID
-	BossID   BossID
-	MinionID MinionID
+	ID          string
+	Type        TargetType
+	Kind        TargetKind
+	PlayerID    PlayerID
+	BossID      BossID
+	MinionID    MinionID
+	OwnerID     PlayerID
+	DisplayName string
 }
 
 type Action struct {
