@@ -12,6 +12,8 @@ var (
 	ErrCardNotInHand         = errors.New("card is not in hand")
 	ErrUnknownCard           = errors.New("unknown card")
 	ErrBoardFull             = errors.New("board is full")
+	ErrMinionNotFound        = errors.New("minion not found")
+	ErrMinionCantAttack      = errors.New("minion cannot attack")
 	ErrUnsupportedCardEffect = errors.New("unsupported card effect")
 	ErrTargetRequired        = errors.New("target is required")
 	ErrInvalidTarget         = errors.New("invalid target")
@@ -31,6 +33,8 @@ func ApplyAction(g *Game, action Action) ([]GameEvent, error) {
 		return applyEndTurn(g, action)
 	case ActionTypePlayCard:
 		return playCard(g, action)
+	case ActionTypeAttack:
+		return applyAttack(g, action)
 	default:
 		return nil, ErrUnknownAction
 	}
@@ -248,4 +252,73 @@ func validateSupportedSpellEffect(card CardDefinition) error {
 	default:
 		return ErrUnsupportedCardEffect
 	}
+}
+
+func applyAttack(g *Game, action Action) ([]GameEvent, error) {
+	playerIndex := findPlayerIndexByID(g, action.PlayerID)
+	if playerIndex == -1 {
+		return nil, ErrInvalidPlayerIndex
+	}
+
+	if g.ActivePlayerID != action.PlayerID {
+		return nil, ErrNotYourTurn
+	}
+
+	if action.TargetID != TargetIDBoss {
+		return nil, ErrInvalidTarget
+	}
+
+	minionIndex := findMinionOnBoard(&g.Players[playerIndex], action.SourceID)
+	if minionIndex == -1 {
+		return nil, ErrMinionNotFound
+	}
+
+	minion := &g.Players[playerIndex].Board[minionIndex]
+	if !minion.CanAttack {
+		return nil, ErrMinionCantAttack
+	}
+
+	minion.CanAttack = false
+
+	attackEvent := GameEvent{
+		Type:     EventAttack,
+		PlayerID: action.PlayerID,
+		SourceID: minion.ID,
+		Target: Target{
+			ID:          TargetIDBoss,
+			Type:        TargetTypeBoss,
+			Kind:        TargetKindBoss,
+			BossID:      g.Boss.ID,
+			DisplayName: g.Boss.Name,
+		},
+		Amount:  minion.Attack,
+		Message: "minion attacked",
+		Turn:    g.Turn,
+	}
+
+	damageEvent := DealDamage(g, minion.Attack)
+	damageEvent.PlayerID = action.PlayerID
+	damageEvent.SourceID = minion.ID
+
+	events := []GameEvent{attackEvent, damageEvent}
+	g.Events = append(g.Events, events...)
+
+	gameOverEvents := CheckGameOver(g)
+	events = append(events, gameOverEvents...)
+
+	return events, nil
+}
+
+func findMinionOnBoard(player *Player, minionID MinionID) int {
+	if player == nil || minionID == "" {
+		return -1
+	}
+
+	for i := range player.Board {
+		if player.Board[i].ID == minionID {
+			return i
+		}
+	}
+
+	return -1
 }

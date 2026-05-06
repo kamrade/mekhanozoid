@@ -11,6 +11,7 @@ const (
 	EventTypeTurnStarted    EventType = "turn_started"
 	EventTypeTurnEnded      EventType = "turn_ended"
 	EventTypeCardPlayed     EventType = "card_played"
+	EventTypeAttack         EventType = "attack"
 	EventTypeMinionSummoned EventType = "minion_summoned"
 	EventTypeDamageDealt    EventType = "damage_dealt"
 	EventTypeHeal           EventType = "heal"
@@ -20,6 +21,7 @@ const (
 
 	// Aliases
 	EventCardPlayed     = EventTypeCardPlayed
+	EventAttack         = EventTypeAttack
 	EventMinionSummoned = EventTypeMinionSummoned
 	EventDamage         = EventTypeDamageDealt
 	EventHeal           = EventTypeHeal
