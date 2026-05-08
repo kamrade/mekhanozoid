@@ -242,3 +242,64 @@ func TestApplyActionAttackCanTriggerGameWon(t *testing.T) {
 		t.Fatalf("expected returned events to contain %q", EventGameWon)
 	}
 }
+
+func TestMinionCanAttackAgainOnOwnersNextTurn(t *testing.T) {
+	g := newTestGame()
+	player1 := &g.Players[0]
+	player2 := &g.Players[1]
+
+	player1.Board = []Minion{
+		{
+			ID:        MinionID("player_1_drone_1"),
+			OwnerID:   player1.ID,
+			Attack:    2,
+			Health:    3,
+			MaxHealth: 3,
+			CanAttack: true,
+		},
+	}
+
+	_, err := ApplyAction(g, Action{
+		Type:     ActionTypeAttack,
+		PlayerID: player1.ID,
+		SourceID: player1.Board[0].ID,
+		TargetID: TargetIDBoss,
+	})
+	if err != nil {
+		t.Fatalf("expected first attack to succeed, got %v", err)
+	}
+
+	if player1.Board[0].CanAttack {
+		t.Fatal("expected minion to be exhausted right after attack")
+	}
+
+	_, err = ApplyAction(g, Action{
+		Type:     ActionTypeEndTurn,
+		PlayerID: player1.ID,
+	})
+	if err != nil {
+		t.Fatalf("expected end turn to player2 to succeed, got %v", err)
+	}
+
+	_, err = ApplyAction(g, Action{
+		Type:     ActionTypeEndTurn,
+		PlayerID: player2.ID,
+	})
+	if err != nil {
+		t.Fatalf("expected end turn back to player1 to succeed, got %v", err)
+	}
+
+	if !player1.Board[0].CanAttack {
+		t.Fatal("expected minion to be refreshed on owner's next turn")
+	}
+
+	_, err = ApplyAction(g, Action{
+		Type:     ActionTypeAttack,
+		PlayerID: player1.ID,
+		SourceID: player1.Board[0].ID,
+		TargetID: TargetIDBoss,
+	})
+	if err != nil {
+		t.Fatalf("expected second attack to succeed after refresh, got %v", err)
+	}
+}

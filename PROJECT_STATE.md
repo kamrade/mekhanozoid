@@ -16,7 +16,7 @@ Current stack:
 
 ## Current stage
 
-Stage 1, steps 1–12 completed.
+Stage 1, steps 1–14 completed.
 
 Current status:
 
@@ -221,6 +221,7 @@ Implemented action types:
 ```go
 ActionTypeEndTurn
 ActionTypePlayCard
+ActionTypeAttack
 ```
 
 Aliases exist:
@@ -349,6 +350,40 @@ Board constraints:
 - when board is full, play is rejected with `ErrBoardFull`
 - on `ErrBoardFull`, game state must not mutate (no mana spend, card stays in hand, board unchanged)
 
+## Attack behavior
+
+`ActionTypeAttack`:
+
+- only works in `GameStatusActive`
+- only active player can attack
+- only minions on active player's board can attack
+- for current step, the only valid target is `boss`
+- attacking minion must have `CanAttack = true`
+- boss takes damage equal to minion `Attack`
+- after attack, minion gets `CanAttack = false`
+- same minion cannot attack twice in the same turn
+- events are returned and appended to `g.Events`
+- game-over check runs after damage
+
+Attack-related errors:
+
+```go
+ErrMinionNotFound
+ErrMinionCantAttack
+ErrInvalidTarget
+ErrNotYourTurn
+ErrGameNotActive
+```
+
+## Turn-start minion refresh
+
+At the start of a player's turn:
+
+- only that player's minions are refreshed
+- refreshed minions get `CanAttack = true`
+- the other player's minions are not changed
+- implementation is part of the existing `ActionTypeEndTurn` flow
+
 ## Victory
 
 Implemented:
@@ -417,6 +452,7 @@ Important event types:
 EventTypeCardDrawn
 EventTypeTurnStarted
 EventTypeCardPlayed
+EventTypeAttack
 EventTypeMinionSummoned
 EventTypeDamageDealt
 EventTypeHeal
@@ -427,6 +463,7 @@ Aliases:
 
 ```go
 EventCardPlayed
+EventAttack
 EventMinionSummoned
 EventDamage
 EventHeal
@@ -448,6 +485,8 @@ ErrUnknownAction
 ErrCardNotInHand
 ErrUnknownCard
 ErrBoardFull
+ErrMinionNotFound
+ErrMinionCantAttack
 ErrUnsupportedCardEffect
 ErrTargetRequired
 ErrInvalidTarget
@@ -465,5 +504,6 @@ ErrInvalidTarget
 - Boss HP should not display below `0`.
 - Player HP should not exceed `MaxHealth`.
 - Summoned minions should not be able to attack on the same turn (`CanAttack = false` on summon).
+- Minions should be refreshed at the start of their owner's turn (`CanAttack = true`).
 - Player board size should never exceed `MaxBoardSize`.
 - After `GameStatusWon`, no new action should be accepted by `ApplyAction`.

@@ -174,6 +174,73 @@ func TestApplyActionEndTurnAppendsEventsToGameEvents(t *testing.T) {
 	}
 }
 
+func TestApplyActionEndTurnRefreshesOnlyNewActivePlayerMinions(t *testing.T) {
+	g := newTestGame()
+
+	g.Players[0].Board = []Minion{
+		{ID: MinionID("p1_m1"), OwnerID: g.Players[0].ID, CanAttack: false},
+		{ID: MinionID("p1_m2"), OwnerID: g.Players[0].ID, CanAttack: true},
+	}
+	g.Players[1].Board = []Minion{
+		{ID: MinionID("p2_m1"), OwnerID: g.Players[1].ID, CanAttack: false},
+		{ID: MinionID("p2_m2"), OwnerID: g.Players[1].ID, CanAttack: false},
+	}
+
+	_, err := ApplyAction(g, Action{
+		Type:     ActionTypeEndTurn,
+		PlayerID: g.Players[0].ID,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if !g.Players[1].Board[0].CanAttack || !g.Players[1].Board[1].CanAttack {
+		t.Fatal("expected player 2 minions to be refreshed at start of player 2 turn")
+	}
+
+	if g.Players[0].Board[0].CanAttack != false {
+		t.Fatal("expected player 1 minions to remain unchanged during player 2 refresh")
+	}
+}
+
+func TestApplyActionEndTurnRefreshesBackToPlayer1Only(t *testing.T) {
+	g := newTestGame()
+
+	g.Players[0].Board = []Minion{
+		{ID: MinionID("p1_m1"), OwnerID: g.Players[0].ID, CanAttack: false},
+	}
+	g.Players[1].Board = []Minion{
+		{ID: MinionID("p2_m1"), OwnerID: g.Players[1].ID, CanAttack: false},
+	}
+
+	_, err := ApplyAction(g, Action{
+		Type:     ActionTypeEndTurn,
+		PlayerID: g.Players[0].ID,
+	})
+	if err != nil {
+		t.Fatalf("expected first end turn to succeed, got %v", err)
+	}
+
+	g.Players[0].Board[0].CanAttack = false
+	g.Players[1].Board[0].CanAttack = false
+
+	_, err = ApplyAction(g, Action{
+		Type:     ActionTypeEndTurn,
+		PlayerID: g.Players[1].ID,
+	})
+	if err != nil {
+		t.Fatalf("expected second end turn to succeed, got %v", err)
+	}
+
+	if !g.Players[0].Board[0].CanAttack {
+		t.Fatal("expected player 1 minions to be refreshed at start of player 1 turn")
+	}
+
+	if g.Players[1].Board[0].CanAttack {
+		t.Fatal("expected player 2 minions to remain unchanged during player 1 refresh")
+	}
+}
+
 // TestApplyActionEndTurnRejectsInactivePlayer verifies that a player who is not
 // currently active cannot end another player's turn.
 func TestApplyActionEndTurnRejectsInactivePlayer(t *testing.T) {

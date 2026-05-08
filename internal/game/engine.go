@@ -57,6 +57,7 @@ func applyEndTurn(g *Game, action Action) ([]GameEvent, error) {
 	g.Turn++
 
 	RefreshMana(g, newActivePlayerIndex)
+	RefreshMinions(g, newActivePlayerIndex)
 
 	turnStartedEvent := GameEvent{
 		Type:     EventTypeTurnStarted,
@@ -321,4 +322,18 @@ func findMinionOnBoard(player *Player, minionID MinionID) int {
 	}
 
 	return -1
+}
+
+func RefreshMinions(g *Game, playerIndex int) {
+	if g == nil {
+		return
+	}
+
+	if playerIndex < 0 || playerIndex >= len(g.Players) {
+		return
+	}
+
+	for i := range g.Players[playerIndex].Board {
+		g.Players[playerIndex].Board[i].CanAttack = true
+	}
 }
