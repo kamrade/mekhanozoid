@@ -58,6 +58,16 @@ func applyEndTurn(g *Game, action Action) ([]GameEvent, error) {
 
 	RefreshMana(g, newActivePlayerIndex)
 	RefreshMinions(g, newActivePlayerIndex)
+	bossAbilityEvents := ResolveBossAbility(g)
+	g.Events = append(g.Events, bossAbilityEvents...)
+	gameOverEvents := CheckGameOver(g)
+
+	if len(gameOverEvents) > 0 {
+		events := make([]GameEvent, 0, len(bossAbilityEvents)+len(gameOverEvents))
+		events = append(events, bossAbilityEvents...)
+		events = append(events, gameOverEvents...)
+		return events, nil
+	}
 
 	turnStartedEvent := GameEvent{
 		Type:     EventTypeTurnStarted,
@@ -70,7 +80,8 @@ func applyEndTurn(g *Game, action Action) ([]GameEvent, error) {
 
 	drawEvents := DrawCard(g, newActivePlayerIndex)
 
-	events := make([]GameEvent, 0, 1+len(drawEvents))
+	events := make([]GameEvent, 0, len(bossAbilityEvents)+1+len(drawEvents))
+	events = append(events, bossAbilityEvents...)
 	events = append(events, turnStartedEvent)
 	events = append(events, drawEvents...)
 

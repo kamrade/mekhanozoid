@@ -25,6 +25,7 @@ const (
 	TargetKindNone TargetKind = "none"
 	TargetKindHero TargetKind = "hero"
 	TargetKindBoss TargetKind = "boss"
+	TargetKindMinion TargetKind = "minion"
 )
 
 type TargetingRule struct {

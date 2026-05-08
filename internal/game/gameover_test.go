@@ -181,3 +181,161 @@ func TestCannotEndTurnAfterGameWon(t *testing.T) {
 		t.Fatalf("expected ErrGameNotActive, got %v", err)
 	}
 }
+
+func TestGameLostWhenPlayer1HealthReachesZero(t *testing.T) {
+	g := newTestGame()
+	g.Players[0].Health = 2
+	g.Players[1].Health = 10
+
+	ApplyBossAbility(g, BossAbility{
+		Type: BossAbilityZapHeroes,
+		Name: "Zap Heroes",
+	})
+
+	events := CheckGameOver(g)
+	if g.Status != GameStatusLost {
+		t.Fatalf("expected game status %q, got %q", GameStatusLost, g.Status)
+	}
+
+	if len(events) != 1 {
+		t.Fatalf("expected 1 game over event, got %d", len(events))
+	}
+
+	if events[0].Type != EventGameLost {
+		t.Fatalf("expected event type %q, got %q", EventGameLost, events[0].Type)
+	}
+
+	if !hasEventType(g.Events, EventGameLost) {
+		t.Fatalf("expected game events to contain %q", EventGameLost)
+	}
+}
+
+func TestGameLostWhenPlayer2HealthReachesZero(t *testing.T) {
+	g := newTestGame()
+	g.Players[0].Health = 10
+	g.Players[1].Health = 2
+
+	ApplyBossAbility(g, BossAbility{
+		Type: BossAbilityZapHeroes,
+		Name: "Zap Heroes",
+	})
+
+	events := CheckGameOver(g)
+	if g.Status != GameStatusLost {
+		t.Fatalf("expected game status %q, got %q", GameStatusLost, g.Status)
+	}
+
+	if len(events) != 1 {
+		t.Fatalf("expected 1 game over event, got %d", len(events))
+	}
+
+	if events[0].Type != EventGameLost {
+		t.Fatalf("expected event type %q, got %q", EventGameLost, events[0].Type)
+	}
+}
+
+func TestCheckGameOverDoesNotDuplicateGameLostEvent(t *testing.T) {
+	g := newTestGame()
+	g.Players[0].Health = 0
+
+	events := CheckGameOver(g)
+	if len(events) != 1 {
+		t.Fatalf("expected 1 game over event, got %d", len(events))
+	}
+
+	if events[0].Type != EventGameLost {
+		t.Fatalf("expected event type %q, got %q", EventGameLost, events[0].Type)
+	}
+
+	eventCountAfterFirstCheck := len(g.Events)
+
+	events = CheckGameOver(g)
+	if len(events) != 0 {
+		t.Fatalf("expected no duplicate game over events, got %d", len(events))
+	}
+
+	if len(g.Events) != eventCountAfterFirstCheck {
+		t.Fatalf("expected event count to stay %d, got %d", eventCountAfterFirstCheck, len(g.Events))
+	}
+}
+
+func TestCannotEndTurnAfterGameLost(t *testing.T) {
+	g := newTestGame()
+	g.Status = GameStatusLost
+
+	_, err := ApplyAction(g, Action{
+		Type:     ActionTypeEndTurn,
+		PlayerID: g.Players[0].ID,
+	})
+
+	if !errors.Is(err, ErrGameNotActive) {
+		t.Fatalf("expected ErrGameNotActive, got %v", err)
+	}
+}
+
+func TestCannotPlayCardAfterGameLost(t *testing.T) {
+	g := newTestGameWithStrikeInPlayer1Hand()
+	player := &g.Players[0]
+	card := player.Hand[0]
+
+	g.Status = GameStatusLost
+	player.Mana = 1
+	player.MaxMana = 1
+
+	_, err := ApplyAction(g, Action{
+		Type:     ActionTypePlayCard,
+		PlayerID: player.ID,
+		CardID:   card.ID,
+	})
+
+	if !errors.Is(err, ErrGameNotActive) {
+		t.Fatalf("expected ErrGameNotActive, got %v", err)
+	}
+}
+
+func TestCannotAttackAfterGameLost(t *testing.T) {
+	g := newTestGame()
+	player := &g.Players[0]
+	player.Board = []Minion{
+		{
+			ID:        MinionID("player_1_drone_1"),
+			OwnerID:   player.ID,
+			Attack:    2,
+			Health:    3,
+			MaxHealth: 3,
+			CanAttack: true,
+		},
+	}
+	g.Status = GameStatusLost
+
+	_, err := ApplyAction(g, Action{
+		Type:     ActionTypeAttack,
+		PlayerID: player.ID,
+		SourceID: player.Board[0].ID,
+		TargetID: TargetIDBoss,
+	})
+
+	if !errors.Is(err, ErrGameNotActive) {
+		t.Fatalf("expected ErrGameNotActive, got %v", err)
+	}
+}
+
+func TestLossHasPrecedenceOverWinWhenBothSidesReachZero(t *testing.T) {
+	g := newTestGame()
+	g.Boss.Health = 0
+	g.Players[0].Health = 0
+	g.Players[1].Health = 10
+
+	events := CheckGameOver(g)
+	if g.Status != GameStatusLost {
+		t.Fatalf("expected status %q when both loss and win conditions are true, got %q", GameStatusLost, g.Status)
+	}
+
+	if len(events) != 1 {
+		t.Fatalf("expected exactly 1 game over event, got %d", len(events))
+	}
+
+	if events[0].Type != EventGameLost {
+		t.Fatalf("expected event type %q, got %q", EventGameLost, events[0].Type)
+	}
+}

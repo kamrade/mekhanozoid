@@ -178,12 +178,12 @@ func TestApplyActionEndTurnRefreshesOnlyNewActivePlayerMinions(t *testing.T) {
 	g := newTestGame()
 
 	g.Players[0].Board = []Minion{
-		{ID: MinionID("p1_m1"), OwnerID: g.Players[0].ID, CanAttack: false},
-		{ID: MinionID("p1_m2"), OwnerID: g.Players[0].ID, CanAttack: true},
+		{ID: MinionID("p1_m1"), OwnerID: g.Players[0].ID, Health: 1, MaxHealth: 1, CanAttack: false},
+		{ID: MinionID("p1_m2"), OwnerID: g.Players[0].ID, Health: 1, MaxHealth: 1, CanAttack: true},
 	}
 	g.Players[1].Board = []Minion{
-		{ID: MinionID("p2_m1"), OwnerID: g.Players[1].ID, CanAttack: false},
-		{ID: MinionID("p2_m2"), OwnerID: g.Players[1].ID, CanAttack: false},
+		{ID: MinionID("p2_m1"), OwnerID: g.Players[1].ID, Health: 1, MaxHealth: 1, CanAttack: false},
+		{ID: MinionID("p2_m2"), OwnerID: g.Players[1].ID, Health: 1, MaxHealth: 1, CanAttack: false},
 	}
 
 	_, err := ApplyAction(g, Action{
@@ -207,10 +207,10 @@ func TestApplyActionEndTurnRefreshesBackToPlayer1Only(t *testing.T) {
 	g := newTestGame()
 
 	g.Players[0].Board = []Minion{
-		{ID: MinionID("p1_m1"), OwnerID: g.Players[0].ID, CanAttack: false},
+		{ID: MinionID("p1_m1"), OwnerID: g.Players[0].ID, Health: 1, MaxHealth: 1, CanAttack: false},
 	}
 	g.Players[1].Board = []Minion{
-		{ID: MinionID("p2_m1"), OwnerID: g.Players[1].ID, CanAttack: false},
+		{ID: MinionID("p2_m1"), OwnerID: g.Players[1].ID, Health: 1, MaxHealth: 1, CanAttack: false},
 	}
 
 	_, err := ApplyAction(g, Action{

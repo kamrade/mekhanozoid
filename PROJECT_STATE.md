@@ -16,7 +16,13 @@ Current stack:
 
 ## Current stage
 
-Stage 1, steps 1–14 completed.
+Stage 1, steps 1–15 and 17–20 completed (step 16 intentionally skipped).
+Stage 2 started: steps 21-22 completed.
+
+Step 14 ("refresh minions at turn start") was re-verified on 2026-05-08:
+
+- attacking minions recover `CanAttack = true` on their owner's next turn
+- ally minions are not refreshed during the other player's turn
 
 Current status:
 
@@ -384,6 +390,29 @@ At the start of a player's turn:
 - the other player's minions are not changed
 - implementation is part of the existing `ActionTypeEndTurn` flow
 
+## Boss abilities
+
+At the start of each player turn, the boss applies exactly one ability.
+This is integrated into the existing `ActionTypeEndTurn` turn-start flow.
+
+Implemented boss abilities:
+
+- `Zap Heroes`
+  - deals `2` damage to both heroes
+- `Bomb Salvo`
+  - deals `2` damage to one random valid target
+  - valid targets: living heroes and living minions
+  - invalid target: boss
+- `Overclock`
+  - increases boss `Attack` by `1`
+
+Boss ability behavior:
+
+- emits `EventTypeBossAbility` (`boss_ability`)
+- mutates game state according to selected ability
+- random ability selection and random `Bomb Salvo` target are deterministic for the same game seed/state
+- minion damage reduces minion health (dead-minion cleanup remains part of later steps)
+
 ## Victory
 
 Implemented:
@@ -400,6 +429,65 @@ Rules:
 - returns the event
 - repeated calls do not duplicate the win event
 - after `GameStatusWon`, `ApplyAction` rejects new actions with `ErrGameNotActive`
+
+## Defeat
+
+Implemented:
+
+- if any hero has `Health <= 0`, game status becomes `GameStatusLost`
+- loss detection is part of `CheckGameOver`
+- `CheckGameOver` emits and stores `EventTypeGameLost` (`game_lost`)
+- repeated calls after terminal status do not duplicate `game_lost`
+- after `GameStatusLost`, `ApplyAction` rejects new actions with `ErrGameNotActive`
+- precedence rule: loss has priority over win when both conditions are true in the same resolution
+
+## Dead minion cleanup
+
+Implemented:
+
+```go
+func CleanupDeadMinions(g *Game) []GameEvent
+```
+
+Rules:
+
+- iterates through both players' boards
+- removes every minion with `Health <= 0`
+- keeps living minions on board
+- emits one `EventTypeMinionDied` (`minion_died`) per removed minion
+- repeated cleanup calls do not duplicate events for already removed minions
+
+Integration:
+
+- cleanup runs after boss abilities (including minion damage from `Bomb Salvo`)
+- dead minions are excluded from minion target lists
+- dead minions are rejected by target validation
+
+## Full scenario test
+
+Implemented:
+
+- `TestGameCanBePlayedUntilWin`
+
+Scenario guarantees:
+
+- game is created via `NewGame` with fixed seed
+- uses `ApplyAction` for player actions
+- includes successful `ActionPlayCard` actions
+- includes `ActionEndTurn` (turn alternation)
+- boss ability logic is triggered in turn-start flow
+- boss HP reaches `0` (with clamp behavior)
+- final status becomes `GameStatusWon`
+
+Additional scenario:
+
+- `TestGameCanBeLost`
+  - deterministic loss setup via fixed seed
+  - triggers boss damage through normal `ActionEndTurn` turn-start flow
+  - reduces hero HP to `0` (clamped)
+  - asserts `GameStatusLost`
+  - asserts `EventTypeGameLost` is stored in `g.Events`
+  - asserts further actions are rejected with `ErrGameNotActive`
 
 ## Targeting
 
@@ -454,9 +542,12 @@ EventTypeTurnStarted
 EventTypeCardPlayed
 EventTypeAttack
 EventTypeMinionSummoned
+EventTypeMinionDied
 EventTypeDamageDealt
 EventTypeHeal
+EventTypeBossAbility
 EventTypeGameWon
+EventTypeGameLost
 ```
 
 Aliases:
@@ -465,9 +556,12 @@ Aliases:
 EventCardPlayed
 EventAttack
 EventMinionSummoned
+EventMinionDied
 EventDamage
 EventHeal
+EventBossAbility
 EventGameWon
+EventGameLost
 ```
 
 ## Errors
@@ -505,5 +599,40 @@ ErrInvalidTarget
 - Player HP should not exceed `MaxHealth`.
 - Summoned minions should not be able to attack on the same turn (`CanAttack = false` on summon).
 - Minions should be refreshed at the start of their owner's turn (`CanAttack = true`).
+- At the start of each turn, the boss should apply exactly one deterministic ability and emit `boss_ability`.
+- Minions with `Health <= 0` should be removed and emit `minion_died`.
 - Player board size should never exceed `MaxBoardSize`.
 - After `GameStatusWon`, no new action should be accepted by `ApplyAction`.
+- After any hero reaches `0` health, game should transition to `GameStatusLost` and reject new actions.
+- A deterministic end-to-end scenario test should validate that the game can be played until win.
+- A deterministic end-to-end scenario test should validate that the game can be lost and blocks further actions.
+
+## Dev console runner
+
+Implemented:
+
+- `cmd/devgame/main.go`
+
+Runner behavior:
+
+- creates a new game with fixed seed
+- prints readable current state:
+  - player 1 HP
+  - player 2 HP
+  - boss HP
+  - active player / turn
+  - active player mana
+  - active player hand
+  - active player board
+  - available actions
+  - recent events
+- supports commands:
+  - `hand` (prints active hand with index, name, cost, type, target hint)
+  - `play <handIndex> [targetID]` (calls `ApplyAction` with `ActionPlayCard`)
+  - `attack <minionIndex> boss` (calls `ApplyAction` with `ActionAttack`)
+  - `end` / `end turn` (calls `ApplyAction` with `ActionEndTurn`)
+  - `state` (reprints full state)
+  - `quit` / `exit` (clean shutdown)
+- prints action errors returned by `ApplyAction`
+- validates command arguments and indexes without panics
+- prints returned events after successful actions

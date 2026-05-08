@@ -1,6 +1,9 @@
 package game
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 // ValidTargets returns all legal targets for a card instance in a player's hand.
 // It is intended for future UI code that needs to highlight selectable targets.
@@ -75,6 +78,11 @@ func ResolveTarget(g *Game, targetID string) (Target, int, error) {
 		}, index, nil
 
 	default:
+		minionTarget, ownerIndex, err := resolveMinionTarget(g, targetID)
+		if err == nil {
+			return minionTarget, ownerIndex, nil
+		}
+
 		return Target{}, -1, ErrInvalidTarget
 	}
 }
@@ -114,6 +122,9 @@ func targetsForRule(g *Game, rule TargetingRule) []Target {
 
 		case TargetKindBoss:
 			targets = append(targets, bossTarget(g))
+
+		case TargetKindMinion:
+			targets = append(targets, livingMinionTargets(g)...)
 		}
 	}
 
@@ -174,4 +185,86 @@ func heroIndexFromTargetID(targetID string) (int, error) {
 	}
 
 	return index, nil
+}
+
+func livingMinionTargets(g *Game) []Target {
+	if g == nil {
+		return nil
+	}
+
+	targets := []Target{}
+
+	for ownerIndex := range g.Players {
+		player := g.Players[ownerIndex]
+		for minionIndex := range player.Board {
+			minion := player.Board[minionIndex]
+			if minion.Health <= 0 {
+				continue
+			}
+
+			targets = append(targets, Target{
+				ID:          minionTargetID(ownerIndex, minion.ID),
+				Type:        TargetTypeMinion,
+				Kind:        TargetKindMinion,
+				MinionID:    minion.ID,
+				OwnerID:     minion.OwnerID,
+				DisplayName: minion.Name,
+			})
+		}
+	}
+
+	return targets
+}
+
+func resolveMinionTarget(g *Game, targetID string) (Target, int, error) {
+	const prefix = "minion:"
+
+	if g == nil {
+		return Target{}, -1, ErrNilGame
+	}
+
+	if !strings.HasPrefix(targetID, prefix) {
+		return Target{}, -1, ErrInvalidTarget
+	}
+
+	parts := strings.Split(targetID, ":")
+	if len(parts) != 3 {
+		return Target{}, -1, ErrInvalidTarget
+	}
+
+	ownerIndex, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return Target{}, -1, ErrInvalidTarget
+	}
+
+	if ownerIndex < 0 || ownerIndex >= len(g.Players) {
+		return Target{}, -1, ErrInvalidTarget
+	}
+
+	minionID := MinionID(parts[2])
+	if minionID == "" {
+		return Target{}, -1, ErrInvalidTarget
+	}
+
+	for i := range g.Players[ownerIndex].Board {
+		minion := g.Players[ownerIndex].Board[i]
+		if minion.ID != minionID {
+			continue
+		}
+
+		if minion.Health <= 0 {
+			return Target{}, -1, ErrInvalidTarget
+		}
+
+		return Target{
+			ID:          targetID,
+			Type:        TargetTypeMinion,
+			Kind:        TargetKindMinion,
+			MinionID:    minion.ID,
+			OwnerID:     minion.OwnerID,
+			DisplayName: minion.Name,
+		}, ownerIndex, nil
+	}
+
+	return Target{}, -1, ErrInvalidTarget
 }

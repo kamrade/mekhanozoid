@@ -13,8 +13,10 @@ const (
 	EventTypeCardPlayed     EventType = "card_played"
 	EventTypeAttack         EventType = "attack"
 	EventTypeMinionSummoned EventType = "minion_summoned"
+	EventTypeMinionDied     EventType = "minion_died"
 	EventTypeDamageDealt    EventType = "damage_dealt"
 	EventTypeHeal           EventType = "heal"
+	EventTypeBossAbility    EventType = "boss_ability"
 	EventTypeGameWon        EventType = "game_won"
 	EventTypeGameLost       EventType = "game_lost"
 	EventTypeCardDrawn      EventType = "card_drawn"
@@ -23,9 +25,12 @@ const (
 	EventCardPlayed     = EventTypeCardPlayed
 	EventAttack         = EventTypeAttack
 	EventMinionSummoned = EventTypeMinionSummoned
+	EventMinionDied     = EventTypeMinionDied
 	EventDamage         = EventTypeDamageDealt
 	EventHeal           = EventTypeHeal
+	EventBossAbility    = EventTypeBossAbility
 	EventGameWon        = EventTypeGameWon
+	EventGameLost       = EventTypeGameLost
 )
 
 type GameEvent struct {
