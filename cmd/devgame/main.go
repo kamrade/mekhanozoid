@@ -11,6 +11,7 @@ import (
 )
 
 const recentEventsLimit = 8
+const devBossHealth = 30
 
 func main() {
 	g := game.NewGame(
@@ -19,6 +20,7 @@ func main() {
 		game.PlayerConfig{ID: "player_2", Name: "Player 2"},
 		42,
 	)
+	prepareDevGame(g)
 
 	fmt.Println("devgame started")
 	printState(g)
@@ -71,6 +73,7 @@ func main() {
 }
 
 func printHelp() {
+	fmt.Println("---")
 	fmt.Println("available actions:")
 	fmt.Println("  hand")
 	fmt.Println("  play <handIndex> [targetID]")
@@ -90,6 +93,12 @@ func printState(g *game.Game) {
 
 	fmt.Println("\n=== Game State ===")
 	fmt.Printf("status: %s\n", g.Status)
+	if g.Status == game.GameStatusWon {
+		fmt.Println("GAME OVER: PLAYERS WON")
+	}
+	if g.Status == game.GameStatusLost {
+		fmt.Println("GAME OVER: PLAYERS LOST")
+	}
 	fmt.Printf("turn: %d\n", g.Turn)
 	fmt.Printf("boss: %s hp=%d/%d atk=%d\n", g.Boss.Name, g.Boss.Health, g.Boss.MaxHealth, g.Boss.Attack)
 
@@ -183,6 +192,27 @@ func findActivePlayer(g *game.Game) game.Player {
 	}
 
 	return game.Player{}
+}
+
+func prepareDevGame(g *game.Game) {
+	if g == nil {
+		return
+	}
+
+	// Dev-only setup so the game can be finished in terminal sessions.
+	if devBossHealth > 0 && devBossHealth < g.Boss.MaxHealth {
+		g.Boss.Health = devBossHealth
+		g.Boss.MaxHealth = devBossHealth
+	}
+
+	for i := range g.Players {
+		if g.Players[i].MaxMana < 1 {
+			g.Players[i].MaxMana = 1
+		}
+		if g.Players[i].Mana < 1 {
+			g.Players[i].Mana = 1
+		}
+	}
 }
 
 func applyAndReport(g *game.Game, action game.Action) {

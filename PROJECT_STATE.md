@@ -17,7 +17,7 @@ Current stack:
 ## Current stage
 
 Stage 1, steps 1–15 and 17–20 completed (step 16 intentionally skipped).
-Stage 2 started: steps 21-22 completed.
+Stage 2 started: steps 21-23 completed.
 
 Step 14 ("refresh minions at turn start") was re-verified on 2026-05-08:
 
@@ -636,3 +636,9 @@ Runner behavior:
 - prints action errors returned by `ApplyAction`
 - validates command arguments and indexes without panics
 - prints returned events after successful actions
+- uses a dev-playable setup:
+  - reduced boss HP for shorter sessions
+  - starting mana baseline so cards can be played from early turns
+- clearly prints terminal outcome:
+  - `GAME OVER: PLAYERS WON`
+  - `GAME OVER: PLAYERS LOST`
