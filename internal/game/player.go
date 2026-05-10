@@ -10,6 +10,7 @@ type Player struct {
 	Name      string
 	Health    int
 	MaxHealth int
+	FatigueDamage int
 	Mana      int
 	MaxMana   int
 	Deck      []CardInstance
@@ -25,6 +26,7 @@ func NewPlayer(id PlayerID, name string) Player {
 		Name:      name,
 		Health:    StartingPlayerHealth,
 		MaxHealth: StartingPlayerHealth,
+		FatigueDamage: 0,
 		Mana:      StartingMana,
 		MaxMana:   StartingMaxMana,
 		Deck:      []CardInstance{},

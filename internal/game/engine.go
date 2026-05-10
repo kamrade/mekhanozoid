@@ -3,7 +3,10 @@
 
 package game
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	ErrGameNotActive         = errors.New("game is not active")
@@ -79,11 +82,13 @@ func applyEndTurn(g *Game, action Action) ([]GameEvent, error) {
 	g.Events = append(g.Events, turnStartedEvent)
 
 	drawEvents := DrawCard(g, newActivePlayerIndex)
+	gameOverEvents = CheckGameOver(g)
 
-	events := make([]GameEvent, 0, len(bossAbilityEvents)+1+len(drawEvents))
+	events := make([]GameEvent, 0, len(bossAbilityEvents)+1+len(drawEvents)+len(gameOverEvents))
 	events = append(events, bossAbilityEvents...)
 	events = append(events, turnStartedEvent)
 	events = append(events, drawEvents...)
+	events = append(events, gameOverEvents...)
 
 	return events, nil
 }
@@ -287,7 +292,7 @@ func applyAttack(g *Game, action Action) ([]GameEvent, error) {
 
 	minion := &g.Players[playerIndex].Board[minionIndex]
 	if !minion.CanAttack {
-		return nil, ErrMinionCantAttack
+		return nil, minionCannotAttackError(*minion)
 	}
 
 	minion.CanAttack = false
@@ -346,5 +351,14 @@ func RefreshMinions(g *Game, playerIndex int) {
 
 	for i := range g.Players[playerIndex].Board {
 		g.Players[playerIndex].Board[i].CanAttack = true
+		g.Players[playerIndex].Board[i].Exhausted = false
 	}
+}
+
+func minionCannotAttackError(minion Minion) error {
+	if minion.Exhausted {
+		return fmt.Errorf("%w: summoning sickness (minion was just summoned)", ErrMinionCantAttack)
+	}
+
+	return fmt.Errorf("%w: already attacked this turn or otherwise unable to attack", ErrMinionCantAttack)
 }

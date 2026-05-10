@@ -325,6 +325,28 @@ func TestApplyActionReturnsErrorForUnknownPlayer(t *testing.T) {
 	}
 }
 
+func TestApplyActionEndTurnCanLoseFromFatigueDraw(t *testing.T) {
+	g := newTestGame()
+	g.Players[1].Deck = []CardInstance{}
+	g.Players[1].Health = 1
+
+	events, err := ApplyAction(g, Action{
+		Type:     ActionTypeEndTurn,
+		PlayerID: g.Players[0].ID,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if g.Status != GameStatusLost {
+		t.Fatalf("expected status %q, got %q", GameStatusLost, g.Status)
+	}
+
+	if !hasEventType(events, EventGameLost) {
+		t.Fatalf("expected returned events to contain %q", EventGameLost)
+	}
+}
+
 // newTestGame creates a deterministic two-player game for engine tests.
 func newTestGame() *Game {
 	return NewGame(

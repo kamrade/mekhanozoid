@@ -73,14 +73,37 @@ func DrawCard(g *Game, playerIndex int) []GameEvent {
 	player := &g.Players[playerIndex]
 
 	if len(player.Deck) == 0 {
-		return []GameEvent{
-			{
-				Type:     EventTypeCardDrawn,
-				PlayerID: player.ID,
-				Message:  "cannot draw card: deck is empty",
-				Turn:     g.Turn,
-			},
+		player.FatigueDamage++
+		fatigue := player.FatigueDamage
+
+		player.Health -= fatigue
+		if player.Health < 0 {
+			player.Health = 0
 		}
+
+		drawEvent := GameEvent{
+			Type:     EventTypeCardDrawn,
+			PlayerID: player.ID,
+			Message:  "cannot draw card: deck is empty",
+			Turn:     g.Turn,
+		}
+		damageEvent := GameEvent{
+			Type:     EventDamage,
+			PlayerID: player.ID,
+			Target: Target{
+				Type:        TargetTypePlayer,
+				Kind:        TargetKindHero,
+				PlayerID:    player.ID,
+				OwnerID:     player.ID,
+				DisplayName: player.Name,
+			},
+			Amount:  fatigue,
+			Message: "fatigue damage: deck is empty",
+			Turn:    g.Turn,
+		}
+
+		g.Events = append(g.Events, drawEvent, damageEvent)
+		return []GameEvent{drawEvent, damageEvent}
 	}
 
 	card := player.Deck[0]

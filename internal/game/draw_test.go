@@ -106,12 +106,50 @@ func TestDrawCardDoesNotPanicWithEmptyDeck(t *testing.T) {
 		t.Fatalf("expected hand size to stay %d, got %d", initialHandSize, len(player.Hand))
 	}
 
-	if len(events) != 1 {
-		t.Fatalf("expected 1 event for empty deck, got %d", len(events))
+	if len(events) != 2 {
+		t.Fatalf("expected 2 events for empty deck (draw + fatigue), got %d", len(events))
 	}
 
 	if events[0].Type != EventTypeCardDrawn {
 		t.Fatalf("expected event type %q, got %q", EventTypeCardDrawn, events[0].Type)
+	}
+
+	if events[1].Type != EventDamage {
+		t.Fatalf("expected second event type %q, got %q", EventDamage, events[1].Type)
+	}
+
+	if events[1].Amount != 1 {
+		t.Fatalf("expected first fatigue damage amount 1, got %d", events[1].Amount)
+	}
+
+	if player.Health != StartingPlayerHealth-1 {
+		t.Fatalf("expected player health %d, got %d", StartingPlayerHealth-1, player.Health)
+	}
+}
+
+func TestDrawCardFatigueDamageIncreasesEachEmptyDraw(t *testing.T) {
+	g := NewGame(
+		"game_1",
+		PlayerConfig{ID: "player_1", Name: "Player 1"},
+		PlayerConfig{ID: "player_2", Name: "Player 2"},
+		42,
+	)
+
+	player := &g.Players[0]
+	player.Deck = []CardInstance{}
+
+	events := DrawCard(g, 0)
+	if len(events) != 2 || events[1].Amount != 1 {
+		t.Fatalf("expected first fatigue damage 1, got events=%+v", events)
+	}
+
+	events = DrawCard(g, 0)
+	if len(events) != 2 || events[1].Amount != 2 {
+		t.Fatalf("expected second fatigue damage 2, got events=%+v", events)
+	}
+
+	if player.Health != StartingPlayerHealth-3 {
+		t.Fatalf("expected player health %d after 1+2 fatigue, got %d", StartingPlayerHealth-3, player.Health)
 	}
 }
 
