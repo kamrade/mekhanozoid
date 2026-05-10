@@ -3,7 +3,10 @@
 
 package game
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 const (
 	StartingDeckSize = 10
@@ -23,10 +26,12 @@ var StartingDeckCardIDs = []CardID{
 	CardID("strike"),
 }
 
-func NewStartingDeck(ownerID PlayerID) []CardInstance {
+func NewStartingDeck(ownerID PlayerID, seed int64) []CardInstance {
 	deck := make([]CardInstance, 0, len(StartingDeckCardIDs))
+	r := rand.New(rand.NewSource(seed))
 
-	for i, cardID := range StartingDeckCardIDs {
+	for i := 0; i < StartingDeckSize; i++ {
+		cardID := StartingDeckCardIDs[r.Intn(len(StartingDeckCardIDs))]
 		card := CardInstance{
 			ID:           CardInstanceID(fmt.Sprintf("%s_card_%02d", ownerID, i+1)),
 			DefinitionID: cardID,

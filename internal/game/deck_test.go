@@ -17,7 +17,7 @@ func TestStartingDeckSizeMatchesCardIDs(t *testing.T) {
 // TestStartingDeckCardsExistInRegistry verifies that every card in a generated
 // starting deck references a known card definition from CardRegistry.
 func TestStartingDeckCardsExistInRegistry(t *testing.T) {
-	deck := NewStartingDeck(PlayerID("player_1"))
+	deck := NewStartingDeck(PlayerID("player_1"), 42)
 
 	if err := ValidateDeckCardsExist(deck); err != nil {
 		t.Fatal(err)

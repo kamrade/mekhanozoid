@@ -87,8 +87,8 @@ func NewGame(id string, p1 PlayerConfig, p2 PlayerConfig, seed int64) *Game {
 	player1 := NewPlayer(PlayerID(p1.ID), p1.Name)
 	player2 := NewPlayer(PlayerID(p2.ID), p2.Name)
 
-	player1.Deck = NewStartingDeck(player1.ID)
-	player2.Deck = NewStartingDeck(player2.ID)
+	player1.Deck = NewStartingDeck(player1.ID, seed)
+	player2.Deck = NewStartingDeck(player2.ID, seed+1)
 
 	ShuffleCards(player1.Deck, seed)
 	ShuffleCards(player2.Deck, seed+1)
