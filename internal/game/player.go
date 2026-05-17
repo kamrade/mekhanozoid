@@ -3,8 +3,6 @@
 
 package game
 
-const StartingPlayerHealth = 30
-
 type Player struct {
 	ID        PlayerID
 	Name      string

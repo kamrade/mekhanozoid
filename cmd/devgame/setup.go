@@ -2,17 +2,6 @@ package main
 
 import "mekhanozid/internal/game"
 
-const (
-	ColorReset  = "\033[0m"
-	ColorRed    = "\033[31m"
-	ColorGreen  = "\033[32m"
-	ColorYellow = "\033[33m"
-	ColorBlue   = "\033[34m"
-)
-
-const recentEventsLimit = 8
-const devBossHealth = 30
-
 func newDevGame() *game.Game {
 	g := game.NewGame(
 		"dev_game_1",
@@ -29,9 +18,9 @@ func prepareDevGame(g *game.Game) {
 		return
 	}
 
-	if devBossHealth > 0 && devBossHealth < g.Boss.MaxHealth {
-		g.Boss.Health = devBossHealth
-		g.Boss.MaxHealth = devBossHealth
+	if DevBossHealth > 0 && DevBossHealth < g.Boss.MaxHealth {
+		g.Boss.Health = DevBossHealth
+		g.Boss.MaxHealth = DevBossHealth
 	}
 
 	for i := range g.Players {

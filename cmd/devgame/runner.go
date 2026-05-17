@@ -92,11 +92,13 @@ func (r *runner) cmdEnd(fields []string) {
 }
 
 func (r *runner) cmdPlay(fields []string) {
+	// Guards
 	if len(fields) < 2 || len(fields) > 3 {
 		fmt.Println("error: usage: play <handIndex> [targetID]")
 		return
 	}
 
+	// Получить номер карты
 	handIndex, err := strconv.Atoi(fields[1])
 	if err != nil {
 		fmt.Printf("error: invalid hand index %q\n", fields[1])
@@ -108,18 +110,26 @@ func (r *runner) cmdPlay(fields []string) {
 		return
 	}
 
+	// Получить активного игрока
 	active := r.activePlayer()
 	if handIndex < 1 || handIndex > len(active.Hand) {
 		fmt.Printf("error: hand index out of range: %d (valid: 1..%d)\n", handIndex, len(active.Hand))
 		return
 	}
 
+	// Получить карту
+	// Получить targetId, если есть
 	card := active.Hand[handIndex-1]
 	targetID := ""
 	if len(fields) == 3 {
 		targetID = fields[2]
 	}
 
+	// В итоге здесь мы имеем
+	// 1. активного игрока
+	// 2. какую карту разыгрываем
+	// 3. цель карты (опционально)
+	// имея всю эту информацию - пытаемся применить карту
 	r.applyAndReport(game.Action{
 		Type:     game.ActionPlayCard,
 		PlayerID: r.g.ActivePlayerID,
@@ -129,6 +139,7 @@ func (r *runner) cmdPlay(fields []string) {
 }
 
 func (r *runner) cmdAttack(fields []string) {
+	// Guards
 	if len(fields) != 3 {
 		fmt.Println("error: usage: attack <minionIndex> boss")
 		return

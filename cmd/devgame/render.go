@@ -185,8 +185,8 @@ func (r *runner) renderRecentEvents() {
 	}
 
 	start := 0
-	if len(r.g.Events) > recentEventsLimit {
-		start = len(r.g.Events) - recentEventsLimit
+	if len(r.g.Events) > RecentEventsLimit {
+		start = len(r.g.Events) - RecentEventsLimit
 	}
 
 	for i := start; i < len(r.g.Events); i++ {
@@ -210,7 +210,7 @@ func (r *runner) renderAllEvents() {
 
 func (r *runner) printHelp() {
 	fmt.Println("available actions:")
-	fmt.Println("                      hand (h)")
+	fmt.Println("                      h | hand")
 	fmt.Println("                      p | play <handIndex> [targetID]")
 	fmt.Println("                      a | attack <minionIndex> boss")
 	fmt.Println("                      e | end")
