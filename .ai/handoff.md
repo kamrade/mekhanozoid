@@ -218,14 +218,12 @@ Boss has concepts such as:
 - `MaxHealth`
 - `Attack`
 - `Armor`
-- side/position if implemented in the boss movement step
 
 Boss HP is clamped to 0 when damaged below zero.
 
 Boss behavior has been added in later Stage 1 steps:
 
 - boss abilities
-- boss movement
 - defeat condition through player death
 
 ---
@@ -336,7 +334,7 @@ Rules implemented:
 - summoned minions start with `CanAttack = false`
 - max board size is 7
 - full board prevents minion play
-- minions can attack the boss through `ActionAttack`
+- minions can attack the boss through `ActionTypeAttack`
 - minions cannot attack twice in a turn
 - minions refresh at the start of their owner's turn
 - dead minions can be cleaned up
@@ -385,7 +383,7 @@ Starting decks use card IDs that must exist in `CardRegistry`.
 Implemented:
 
 ```go
-func NewStartingDeck(ownerID PlayerID) []CardInstance
+func NewStartingDeck(ownerID PlayerID, seed int64) []CardInstance
 func DrawCard(g *Game, playerIndex int) []GameEvent
 ```
 
@@ -396,6 +394,7 @@ Draw rules:
 - deck size decreases by 1
 - hand size increases by 1
 - creates `EventTypeCardDrawn`
+- if deck is empty, draw triggers increasing fatigue damage to that hero
 - does not panic for empty deck, nil game, or invalid player index
 
 ---
@@ -411,6 +410,7 @@ func ApplyAction(g *Game, action Action) ([]GameEvent, error)
 Implemented action types include:
 
 ```go
+ActionTypeStartGame
 ActionTypeEndTurn
 ActionTypePlayCard
 ActionTypeAttack
@@ -421,7 +421,6 @@ Aliases may exist:
 ```go
 ActionEndTurn
 ActionPlayCard
-ActionAttack
 ```
 
 `Action` includes concepts like:
@@ -456,8 +455,7 @@ Rules:
 - refreshes mana for new active player
 - draws a card for new active player
 - refreshes minions for new active player
-- moves boss if boss movement is enabled
-- applies boss ability if boss abilities are enabled
+- applies boss ability at turn start
 - creates turn/boss-related events
 - rejects actions after game is won or lost
 
@@ -630,7 +628,7 @@ Game over rules:
 
 # Boss behavior
 
-Stage 1 included boss abilities and boss movement.
+Stage 1 included boss abilities.
 
 Implemented boss ability examples from the roadmap:
 
@@ -642,19 +640,13 @@ Overclock: boss gets +1 Attack
 
 Rules:
 
-- boss applies one ability at the start of turns, if implemented as planned
+- boss applies one ability at the start of turns
 - creates a `boss_ability` event
 - ability mutates game state
 - random behavior is controlled by seed
 - seeded tests should be deterministic
 
-Boss movement:
-
-- boss side/position changes with active player, or boss is considered to stand on active player's side
-- movement creates a `boss_moved` event
-- expected side behavior:
-  - active Player 1 -> boss side 0
-  - active Player 2 -> boss side 1
+Boss movement is not implemented in the current codebase.
 
 ---
 
@@ -672,7 +664,6 @@ EventTypeDamageDealt
 EventTypeHeal
 EventTypeMinionSummoned
 EventTypeBossAbility
-EventTypeBossMoved
 EventTypeMinionDied
 EventTypeGameWon
 EventTypeGameLost
@@ -716,8 +707,7 @@ ErrTargetRequired
 ErrInvalidTarget
 ErrBoardFull
 ErrMinionNotFound
-ErrMinionCannotAttack
-ErrInvalidAttackTarget
+ErrMinionCantAttack
 ```
 
 Exact names should be confirmed against code before adding new features.
@@ -939,10 +929,9 @@ Before making the next code change, confirm these facts in the repository:
 3. Exact `CardDefinition` fields.
 4. Exact error names.
 5. Exact boss ability implementation details.
-6. Exact boss side/position field name.
-7. Exact minion attack action shape.
-8. Exact CLI command parsing structure.
-9. Whether `Discard` is already used when playing cards.
-10. Whether scenario tests use real cards or special test fixtures.
+6. Exact minion attack action shape.
+7. Exact CLI command parsing structure.
+8. Whether `Discard` is already used when playing cards.
+9. Whether scenario tests use real cards or special test fixtures.
 
 This handoff describes the completed architecture and behavior at the end of Stage 1 and Stage 2.
